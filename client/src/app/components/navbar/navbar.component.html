@@ -21,6 +21,10 @@
 
             <ul class="navbar-nav ml-auto">
                 <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                    <a class="nav-link" [routerLink]="['/register']">Register</a>
+                </li>
+
+                <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
                     <a class="nav-link" [routerLink]="['/dashboard']">Dashboard</a>
                 </li>
             </ul>
