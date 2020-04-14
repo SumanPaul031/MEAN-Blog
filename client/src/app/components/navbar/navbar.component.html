@@ -1,0 +1,29 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="#">MEAN Blog</a>
+        <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button> -->
+
+        <button class="navbar-toggler collapsed" type="button" data-toggle="collapse" data-target="#navbarText" (click)="isCollapsed = !isCollapsed" [attr.aria-expanded]="!isCollapsed" aria-controls="navbarText" aria-label="Toggle navigation">
+            <!-- <span class="navbar-toggler-icon"></span> -->
+            <span class="icon-bar top-bar"></span>
+            <span class="icon-bar middle-bar"></span>
+            <span class="icon-bar bottom-bar"></span>
+        </button>
+
+        <div class="collapse navbar-collapse"  id="navbarText" [ngbCollapse]="isCollapsed">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                    <a class="nav-link" [routerLink]="['/']">Home</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                    <a class="nav-link" [routerLink]="['/dashboard']">Dashboard</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

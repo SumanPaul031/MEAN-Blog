@@ -1,0 +1,45 @@
+.navbar .navbar-nav .nav-link {
+    border-radius: 0.25rem;
+    margin: 0 0.25em;
+}
+
+.navbar-toggler {
+    border: none;
+    background: transparent !important;
+}
+.navbar-toggler:focus {
+    outline: none;
+    background: transparent !important;
+}
+.navbar-toggler .icon-bar {
+    background-color: #fff;
+    transform: rotate(0deg) translate(0px, 0px);
+    transition: ease all 0.2s;
+    display: block;
+    width: 22px;
+    height: 2px;
+    border-radius: 1px;
+}
+.navbar-toggler .icon-bar + .icon-bar {
+    margin-top: 5px;
+}
+.navbar-toggler[aria-expanded="true"] .top-bar {
+    transform: rotate(45deg);
+    transform-origin: 10% 10%;
+}
+.navbar-toggler[aria-expanded="true"] .middle-bar {
+    opacity: 0;
+}
+.navbar-toggler[aria-expanded="true"] .bottom-bar {
+    transform: rotate(-45deg);
+    transform-origin: 0% 50%;
+}
+.navbar-toggler[aria-expanded="false"] .top-bar {
+    transform: rotate(0);
+}
+.navbar-toggler[aria-expanded="false"] .middle-bar {
+    opacity: 1;
+}
+.navbar-toggler[aria-expanded="false"] .bottom-bar {
+    transform: rotate(0);
+}
