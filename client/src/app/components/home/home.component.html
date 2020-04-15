@@ -1,10 +1,15 @@
 <div class="jumbotron text-center">
     <h1>MEAN Blog Application</h1>
     <p class="lead">Welcome to the MEAN Blog Application by <strong>Suman Paul</strong></p>
-    <div>
+    <div *ngIf="!isUserLoggedIn; then NotLoggedIn"></div>
+    <ng-template #NotLoggedIn>
+      <a class="btn btn-primary" [routerLink]="['/register']" role="button" style="margin-right: 0.5rem;">Register</a>
+      <a class="btn btn-dark" [routerLink]="['/login']" role="button">Login</a>
+    </ng-template>
+    <!-- <div>
       <a [routerLink]="['/register']" class="btn btn-primary" style="margin-right: 0.5rem;">Register</a>
-      <a href="#" class="btn btn-info">Login</a>
-    </div>
+      <a [routerLink]="['/login']" class="btn btn-info">Login</a>
+    </div> -->
   </div>
   
   <div class="row">

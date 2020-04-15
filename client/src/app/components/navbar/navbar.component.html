@@ -19,15 +19,33 @@
                 </li>
             </ul>
 
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
-                    <a class="nav-link" [routerLink]="['/register']">Register</a>
-                </li>
+            <div *ngIf="isUserLoggedIn; then LoggedIn else LoggedOut"></div>
 
-                <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
-                    <a class="nav-link" [routerLink]="['/dashboard']">Dashboard</a>
-                </li>
-            </ul>
+            <ng-template #LoggedIn>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                        <a class="nav-link" [routerLink]="['/blog']">Blog</a>
+                    </li>
+                    <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                        <a class="nav-link" [routerLink]="['/dashboard']">Dashboard</a>
+                    </li>
+                    <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                        <a class="nav-link" [routerLink]="['/profile']">Hello, <b>{{username}}</b></a>
+                    </li>
+                </ul>
+                <button class="btn btn-danger" (click)="onLogoutBtnClick()" data-toggle="collapse" data-target=".navbar-collapse.show">Logout</button>
+            </ng-template>
+
+            <ng-template #LoggedOut>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                        <a class="nav-link" [routerLink]="['/login']">Login</a>
+                    </li>
+                    <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                        <a class="nav-link" [routerLink]="['/register']">Register</a>
+                    </li>
+                </ul>
+            </ng-template>
         </div>
     </div>
 </nav>

@@ -1,40 +1,41 @@
 import { Component, OnInit } from '@angular/core';
+import { DataSharingService } from 'src/app/services/data-sharing.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import { DataSharingService } from 'src/app/services/data-sharing.service';
-import { Router } from '@angular/router';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
 @Component({
-  selector: 'app-navbar',
-  templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css']
+  selector: 'app-profile',
+  templateUrl: './profile.component.html',
+  styleUrls: ['./profile.component.css']
 })
-export class NavbarComponent implements OnInit {
+export class ProfileComponent implements OnInit {
 
-  isCollapsed = true;
   isUserLoggedIn: boolean;
   val: boolean;
   username;
+  email;
 
-  constructor(private authService: AuthService, 
-    private toastr: ToastrService,
+  constructor(
     private dataSharingService: DataSharingService,
-    private router: Router) { 
+    private authService: AuthService,
+    private toastr: ToastrService) { 
       this.dataSharingService.isUserLoggedIn.subscribe( value => {
         this.isUserLoggedIn = value;
       });
-
+  
       this.dataSharingService.username.subscribe( value => {
         this.username = value;
       });
-  }
+    }
 
   ngOnInit(): void {
     this.val = localStorage.getItem('token') ? true : false;
 
     if(this.val){
       this.authService.getUser().subscribe((res: HttpResponse<any>) => {
+        this.username = res.body.username;
+        this.email = res.body.email;
         this.dataSharingService.isUserLoggedIn.next(true);
         this.dataSharingService.username.next(res.body.username);
       }, 
@@ -48,15 +49,6 @@ export class NavbarComponent implements OnInit {
       this.dataSharingService.isUserLoggedIn.next(false);
       this.dataSharingService.username.next('');
     }
-  }
-
-  onLogoutBtnClick(){
-    this.isCollapsed = !this.isCollapsed;
-    this.authService.logout();
-    this.toastr.success('You have Logged Out successfully', 'Success');
-    this.router.navigate(['/']);
-    this.dataSharingService.isUserLoggedIn.next(false);
-    this.dataSharingService.username.next('');
   }
 
 }
