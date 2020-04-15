@@ -1,5 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from 'src/app/services/auth.service';
+import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-register',
@@ -9,8 +13,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 export class RegisterComponent implements OnInit {
 
   form: FormGroup;
+  usernameAvailable: boolean = true;
+  usernameAvailableMsg: string;
+  emailAvailable: boolean = true;
+  emailAvailableMsg: string;
 
-  constructor(private formBuilder: FormBuilder) { 
+  constructor(private formBuilder: FormBuilder, private authService: AuthService, private toastr: ToastrService, private router: Router) { 
     this.createForm();
   }
 
@@ -79,6 +87,57 @@ export class RegisterComponent implements OnInit {
   }
 
   onRegisterSubmit(){
-    console.log(this.form);
+    // console.log(this.form);
+    const user = {
+      email: this.form.get('email').value,
+      username: this.form.get('username').value,
+      password: this.form.get('password').value
+    }
+
+    this.authService.registerUser(user).subscribe((res: HttpResponse<any>) => {
+      // console.log('Success: '+res.body.message);
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        this.router.navigate(['/login']);
+      } else{
+        this.toastr.error(res.body.message, 'Failure');
+        this.router.navigate(['/register']);
+      }      
+    },
+    (err: HttpErrorResponse) => {
+      console.log('Failure: '+err.error);
+      // this.toastr.error(err.error.message, 'Failure');
+      this.router.navigate(['/register']);
+    })
+  }
+
+  checkUsername(){
+    this.authService.checkUsername(this.form.get('username').value).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.usernameAvailable = true;
+        this.usernameAvailableMsg = '';
+      } else{
+        this.usernameAvailable = false;
+        this.usernameAvailableMsg = res.body.message;
+      }
+    }, 
+    (err: HttpErrorResponse) => {
+      console.log('Failure: '+err.error);
+    })
+  }
+
+  checkEmail(){
+    this.authService.checkEmail(this.form.get('email').value).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.emailAvailable = true;
+        this.emailAvailableMsg = '';
+      } else{
+        this.emailAvailable = false;
+        this.emailAvailableMsg = res.body.message;
+      }
+    }, 
+    (err: HttpErrorResponse) => {
+      console.log('Failure: '+err.error);
+    })
   }
 }

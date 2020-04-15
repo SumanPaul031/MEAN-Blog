@@ -2,25 +2,27 @@
 <form [formGroup]="form" (submit)="onRegisterSubmit()">
     <div class="form-group">
         <label for="username">Username</label>
-        <div [ngClass]="{'is-invalid': (form.controls.username.errors && form.controls.username.dirty), 'is-valid': !form.controls.username.errors}">
-            <input type="text" name="username" class="form-control" formControlName="username" autocomplete="off" placeholder="*Enter username...">
+        <div [ngClass]="{'is-invalid': (form.controls.username.errors && form.controls.username.dirty) || (!usernameAvailable && form.controls.username.dirty), 'is-valid': (!form.controls.username.errors && usernameAvailable)}">
+            <input type="text" name="username" (keyup)="checkUsername()" class="form-control" formControlName="username" autocomplete="off" placeholder="*Enter username...">
             <ul class="help-center">
                 <li *ngIf="form.controls.username.dirty && form.controls.username.errors?.required" style="color: red;">Name is required!</li>
                 <li *ngIf="form.controls.username.dirty && form.controls.username.errors?.minlength" style="color: red;">Minimum of 3 characters!</li>
                 <li *ngIf="form.controls.username.dirty && form.controls.username.errors?.maxlength" style="color: red;">Maximum of 15 characters</li>
                 <li *ngIf="form.controls.username.dirty && form.controls.username.errors?.validateUsername" style="color: red;">No Special characters and spaces</li>
+                <li *ngIf="form.controls.username.dirty && !usernameAvailable && (usernameAvailableMsg !== '')" style="color: red;">{{usernameAvailableMsg}}</li>
             </ul>
         </div>
     </div>
     <div class="form-group">
         <label for="email">Email</label>
-        <div [ngClass]="{'is-invalid': (form.controls.email.errors && form.controls.email.dirty), 'is-valid': !form.controls.email.errors}">
-            <input type="email" name="email" class="form-control" formControlName="email" autocomplete="off" placeholder="*Enter email...">
+        <div [ngClass]="{'is-invalid': (form.controls.email.errors && form.controls.email.dirty) || (!emailAvailable && form.controls.email.dirty), 'is-valid': (!form.controls.email.errors && emailAvailable)}">
+            <input type="email" name="email" (keyup)="checkEmail()" class="form-control" formControlName="email" autocomplete="off" placeholder="*Enter email...">
             <ul class="help-center">
                 <li *ngIf="form.controls.email.dirty && form.controls.email.errors?.required" style="color: red;">Email is required!</li>
                 <li *ngIf="form.controls.email.dirty && form.controls.email.errors?.minlength" style="color: red;">Minimum of 5 characters!</li>
                 <li *ngIf="form.controls.email.dirty && form.controls.email.errors?.maxlength" style="color: red;">Maximum of 30 characters</li>
                 <li *ngIf="form.controls.email.dirty && form.controls.email.errors?.validateEmail" style="color: red;">Please enter a valid email</li>
+                <li *ngIf="form.controls.email.dirty && !emailAvailable  && (emailAvailableMsg !== '')" style="color: red;">{{emailAvailableMsg}}</li>
             </ul>
         </div>
     </div>
@@ -46,7 +48,7 @@
             </ul>
         </div>
     </div>
-    <button [disabled]="!form.valid" type="submit" class="btn btn-primary">Register</button>
+    <button [disabled]="!form.valid || !usernameAvailable || !emailAvailable" type="submit" class="btn btn-primary">Register</button>
 </form>
 
 <!-- <p>Username: {{ form.controls.username.value }}</p>
