@@ -1,14 +1,13 @@
-import { Component, OnInit } from '@angular/core';
-import { DataSharingService } from 'src/app/services/data-sharing.service';
-import { AuthService } from 'src/app/services/auth.service';
+import { Injectable } from '@angular/core';
+import { Router, CanActivate } from '@angular/router';
+import { DataSharingService } from './data-sharing.service';
+import { AuthService } from './auth.service';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 
-@Component({
-  selector: 'app-blog',
-  templateUrl: './blog.component.html',
-  styleUrls: ['./blog.component.css']
+@Injectable({
+  providedIn: 'root'
 })
-export class BlogComponent implements OnInit {
+export class PermissionGuardService implements CanActivate {
 
   isUserLoggedIn: boolean;
   val: boolean;
@@ -18,10 +17,7 @@ export class BlogComponent implements OnInit {
   isModerator: boolean;
   isGuest: boolean;
 
-  constructor(
-    private dataSharingService: DataSharingService,
-    private authService: AuthService
-  ) { 
+  constructor(private router: Router, private dataSharingService: DataSharingService, private authService: AuthService) { 
     this.dataSharingService.isUserLoggedIn.subscribe( value => {
       this.isUserLoggedIn = value;
     });
@@ -43,10 +39,8 @@ export class BlogComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.val = localStorage.getItem('x-access-token') ? true : false;
-
-    if(this.val){
+  canActivate(): boolean{
+    if(localStorage.getItem('x-access-token') !== null){      
       this.authService.getUser().subscribe((res: HttpResponse<any>) => {
         this.isGuest = res.body.permission === 'user' ? true : false;
           if(!this.isGuest){
@@ -67,20 +61,30 @@ export class BlogComponent implements OnInit {
             this.dataSharingService.Admin.next(false);
             this.dataSharingService.Guest.next(true);
           }
-          this.username = res.body.username;
           this.dataSharingService.isUserLoggedIn.next(true);
           this.dataSharingService.username.next(res.body.username);
       }, 
       (error: HttpErrorResponse) => {
-        // console.log(error.error);
         this.authService.logout()
         this.dataSharingService.isUserLoggedIn.next(false);
         this.dataSharingService.username.next('');
-      })
-    } else{
-      this.dataSharingService.isUserLoggedIn.next(false);
-      this.dataSharingService.username.next('');
+      });
+
+      if(this.isGuest === true){
+        this.router.navigate(['/']);
+        return false;
+      } else if(this.isAdmin === true){
+        return true;
+      } else if(this.isModerator === true){
+        return true;
+      } else{
+        this.router.navigate(['/']);
+        return false;
+      }
+    }
+    else{
+      this.router.navigate(['/']);
+      return false;
     }
   }
-
 }

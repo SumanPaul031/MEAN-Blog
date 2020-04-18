@@ -1,0 +1,114 @@
+<h1 class="page-header">User Management</h1>
+<mat-spinner *ngIf="loading"></mat-spinner>
+
+<div *ngIf="!loading">
+    <!-- <input type="text" id="myInput" placeholder="Search for names.."> -->
+    <div class="container">
+        <div class="form-group has-search">
+            <span class="fa fa-search form-control-feedback"></span>
+            <input id="usernameInput" type="text" (keyup)="usernameSearch()" class="form-control" placeholder="Search by Username...">
+        </div>
+        <div class="form-group has-search">
+            <span class="fa fa-search form-control-feedback"></span>
+            <input id="emailInput" type="text" (keyup)="emailSearch()" class="form-control" placeholder="Search by Email...">
+        </div>
+    </div>
+    
+    <div style="overflow-x:auto;">
+        <table id="myTable" class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                  <th scope="col" (click)="sortTable(0)" style="cursor: pointer;">Username</th>
+                  <th scope="col" (click)="sortTable(1)" style="cursor: pointer;">Email</th>
+                  <th scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of users | paginate: { itemsPerPage: pageSize, currentPage: p }">
+                    <td>{{user.username}}</td>
+                    <td>{{user.email}}</td>
+                    <td>
+                        <!-- <button class="button" [routerLink]="['/edit', user._id]"><i class="fas fa-edit"></i></button> -->
+                        <button class="button" data-toggle="modal" (click)="onEditClick(user._id)" data-target="#editModal"><i class="fa fa-edit"></i></button>
+                        <button class="button btn-danger" *ngIf="isMainAdmin" data-toggle="modal" (click)="DeleteClick(user._id)" data-target="#deleteModal"><i class="fa fa-trash"></i></button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div style="float: right;">
+        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+    </div>
+    <div style="float: left;">
+        <p>Items per page: </p>
+        <select id="PerPage" class="form-control" [(ngModel)]="pageSize">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </select>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div class="modal" id="editModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+  
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Edit User</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+  
+        <!-- Modal body -->
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                    <label for="username">Userame</label>
+                    <input [disabled]="(!callerIsAdmin && isAdmin)" [formControl]="formusername" type="text" name="username" class="form-control" [(ngModel)]="editusername" id="username" placeholder="Enter Userame..." required>
+                    <mat-error *ngIf="formusername.invalid">{{usernameErrorMessage()}}</mat-error>
+                    <br>
+                    <label for="email">Name</label>
+                    <input [disabled]="(!callerIsAdmin && isAdmin)" [formControl]="formemail" type="text" name="email" class="form-control" [(ngModel)]="editemail" id="email" placeholder="Enter Email..." required>
+                    <mat-error *ngIf="formemail.invalid">{{emailErrorMessage()}}</mat-error>
+                    <br>
+                    <p>Current Permission: <strong>{{editpermission}}</strong></p>
+                    <button *ngIf="(isGuest || isModerator) && !isAdmin" [disabled]="(!callerIsAdmin && (isAdmin || isGuest || isModerator)) || formusername.invalid || formemail.invalid" (click)="grantAdmin();" class="btn btn-primary">Grant Admin</button>
+                    <button *ngIf="(isGuest || isAdmin) && !isModerator" [disabled]="(!callerIsAdmin && isAdmin) || formusername.invalid || formemail.invalid" (click)="grantModerator();" class="btn btn-info">Grant Moderator</button>
+                    <button *ngIf="(isAdmin || isModerator) && !isGuest" [disabled]="(!callerIsAdmin && isAdmin) || formusername.invalid || formemail.invalid" (click)="grantUser()" class="btn btn-danger">Grant User</button>
+                </div>
+            </form>
+        </div>
+  
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button [disabled]="(!callerIsAdmin && isAdmin) || formusername.invalid || formemail.invalid" type="button" class="btn btn-primary" (click)="onUpdateClick()">Update</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+  
+      </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal" id="deleteModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+  
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Are You Sure You want to Delete <strong>{{editusername}}?</strong></h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" (click)="onDeleteClick(editemail)" data-dismiss="modal">Yes</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+        </div>
+  
+      </div>
+    </div>
+</div>

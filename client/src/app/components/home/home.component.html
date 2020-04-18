@@ -1,7 +1,8 @@
 <div class="jumbotron text-center">
     <h1>MEAN Blog Application</h1>
     <p class="lead">Welcome to the MEAN Blog Application by <strong>Suman Paul</strong></p>
-    <div *ngIf="!isUserLoggedIn; then NotLoggedIn"></div>
+    <mat-spinner *ngIf="loading"></mat-spinner>
+    <div *ngIf="!isUserLoggedIn && !loading; then NotLoggedIn"></div>
     <ng-template #NotLoggedIn>
       <a class="btn btn-primary" [routerLink]="['/register']" role="button" style="margin-right: 0.5rem;">Register</a>
       <a class="btn btn-dark" [routerLink]="['/login']" role="button">Login</a>

@@ -122,7 +122,7 @@ export class RegisterComponent implements OnInit {
       }
     }, 
     (err: HttpErrorResponse) => {
-      console.log('Failure: '+err.error);
+      // console.log('Failure of Username Check: '+err.error);
     })
   }
 
@@ -137,7 +137,7 @@ export class RegisterComponent implements OnInit {
       }
     }, 
     (err: HttpErrorResponse) => {
-      console.log('Failure: '+err.error);
+      // console.log('Failure of Email Check: '+err.error);
     })
   }
 }

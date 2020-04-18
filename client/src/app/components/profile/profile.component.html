@@ -1,5 +1,161 @@
-<h1 class="page-header">{{username}}'s Profile</h1>
-<ul class="list-group">
-    <li class="list-group-item list-group-item-success">Username: {{username}}</li>
-    <li class="list-group-item list-group-item-danger">Email: {{email}}</li>
-</ul>
+<mat-spinner *ngIf="loading"></mat-spinner>
+
+<ng-template [ngIf]="!loading">
+  <h1 class="page-header">{{username}}'s Profile</h1>
+  <br>
+
+  <!-- <mat-spinner *ngIf="imgloading"></mat-spinner> -->
+
+  <div *ngIf="!hasProfileImg" class="container">
+    <div class="row">
+      <div class="col-md-4 m-auto">
+          <file-pond type="file" #myPond
+            [options]="pondOptions" 
+            [files]="pondFiles"
+            (oninit)="pondHandleInit()"
+            (onaddfile)="pondHandleAddFile($event)"
+            (onremovefile)="pondHandleRemoveFile($event)"
+            (change)="changeListener($event)"
+            allowFileEncode=true>
+          </file-pond>
+          <button *ngIf="imgAdded" type="button" class="btn btn-success" (click)="avatarUpload()">Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="hasProfileImg" class="container">
+    <div class="row">
+      <div class="col-md-4 m-auto">
+        <h4>Profile Image:</h4>
+        <img [src]="path" style="max-height: 300px; max-width: 300px;" alt="Profile Image">
+        <br>
+        <button class="btn btn-warning" data-toggle="modal" data-target="#imageUploadModal">Change Profile Image</button>
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <table class="table table-striped">
+      <thead class="thead-dark">
+          <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Value</th>
+            <th scope="col">Edit</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr>
+              <th scope="row">Username</th>
+              <td>{{username}}</td>
+              <td>
+                  <button class="button" data-toggle="modal" (click)="onEditClick()" data-target="#editUsernameModal"><i class="fa fa-edit"></i></button>
+              </td>
+          </tr>
+          <tr>
+              <th scope="row">Email</th>
+              <td>{{email}}</td>
+              <td>
+                  <button class="button" data-toggle="modal" (click)="onEditClick()" data-target="#editEmailModal"><i class="fa fa-edit"></i></button>
+              </td>
+          </tr>
+      </tbody>
+  </table>
+
+  <!-- Edit Username Modal -->
+  <div class="modal" id="editUsernameModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+    
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Edit Username</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+    
+          <!-- Modal body -->
+          <div class="modal-body">
+              <form>
+                  <div class="form-group">
+                      <label for="username">Username</label>
+                      <input [formControl]="formusername" type="text" name="username" class="form-control" [(ngModel)]="editusername" id="username" placeholder="Enter Username..." required>
+                      <mat-error *ngIf="formusername.invalid">{{usernameErrorMessage()}}</mat-error>
+                  </div>
+              </form>
+          </div>
+    
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button [disabled]="formusername.invalid" type="button" class="btn btn-primary" (click)="onUpdateClick()">Update</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+    
+        </div>
+      </div>
+  </div>
+
+  <!-- Edit Email Modal -->
+  <div class="modal" id="editEmailModal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+    
+          <!-- Modal Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Edit Email</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+    
+          <!-- Modal body -->
+          <div class="modal-body">
+              <form>
+                  <div class="form-group">
+                      <label for="email">Email</label>
+                      <input [formControl]="formemail" type="text" name="email" class="form-control" [(ngModel)]="editemail" id="email" placeholder="Enter Email..." required>
+                      <mat-error *ngIf="formemail.invalid">{{emailErrorMessage()}}</mat-error>
+                  </div>
+              </form>
+          </div>
+    
+          <!-- Modal footer -->
+          <div class="modal-footer">
+            <button [disabled]="formemail.invalid" type="button" class="btn btn-primary" (click)="onUpdateClick()">Update</button>
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+    
+        </div>
+      </div>
+  </div>
+
+  <!-- Image Upload Modal -->
+  <div class="modal" id="imageUploadModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+  
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Upload Profile Image</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+  
+        <!-- Modal body -->
+        <div class="modal-body">
+          <file-pond type="file" #myPond
+          [options]="pondOptions" 
+          [files]="pondFiles"
+          (oninit)="pondHandleInit()"
+          (onaddfile)="pondHandleAddFile($event)"
+          (onremovefile)="pondHandleRemoveFile($event)"
+          (change)="changeListener($event)"
+          allowFileEncode=true>
+          </file-pond>
+          <button *ngIf="imgAdded" type="button" class="btn btn-success" (click)="avatarUpload()" data-dismiss="modal">Upload</button>
+        </div>
+  
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+  
+      </div>
+    </div>
+</div>
+</ng-template>

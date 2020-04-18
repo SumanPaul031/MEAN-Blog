@@ -21,7 +21,7 @@ export class AuthService {
   checkEmail(email){
     return this.http.get(`/authentication/checkEmail/${email}`, { observe: 'response' }).pipe(
       tap((res: HttpResponse<any>) => {
-        console.log(res);
+        // console.log(res);
       })
     )
   }
@@ -29,7 +29,7 @@ export class AuthService {
   checkUsername(username){
     return this.http.get(`/authentication/checkUsername/${username}`, { observe: 'response' }).pipe(
       tap((res: HttpResponse<any>) => {
-        console.log(res);
+        // console.log(res);
       })
     )
   }
@@ -39,20 +39,40 @@ export class AuthService {
       tap((res: HttpResponse<any>) => {
         // console.log(res);
         if(res.body.user){
-          this.storeUserData(res.body.token, res.body.user.username);
+          this.setSession(res.body.user._id, res.body.headers['x-access-token'], res.body.headers['x-refresh-token']);
         }
       })
     );
   }
 
-  storeUserData(token, username){
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', username);
+  getNewAccessToken(){
+    return this.http.get(`/authentication/access-token`, {
+      headers: {
+        'x-refresh-token': this.getRefreshToken(),
+        '_id': this.getUserId()
+      },
+      observe: 'response'
+    }).pipe(
+      tap((res: HttpResponse<any>) => {
+        this.setAccessToken(res.body.headers['x-access-token']);
+      })
+    )
   }
 
-  removeUserData(){
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  private setSession(userId: string, accessToken: string, refreshToken: string){
+    localStorage.setItem('user-id', userId);
+    localStorage.setItem('x-access-token', accessToken);
+    localStorage.setItem('x-refresh-token', refreshToken);
+  }
+
+  private removeSession(){
+    localStorage.removeItem('user-id');
+    localStorage.removeItem('x-access-token');
+    localStorage.removeItem('x-refresh-token');
+  }
+
+  setAccessToken(token: string){
+    localStorage.setItem('x-access-token', token);
   }
 
   getUser(){
@@ -63,12 +83,140 @@ export class AuthService {
     );
   }
 
+  activateAccount(token: string){
+    return this.http.get(`/authentication/activate/${token}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        console.log(res);
+      })
+    );
+  }
+
+  checkResendEmail(email: string){
+    return this.http.post('/authentication/resend', {email}, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        console.log(res);
+      })
+    );
+  }
+
+  resendLink(email: string){
+    return this.http.put('/authentication/resend', {email}, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        console.log(res);
+      })
+    );
+  }
+
+  sendUsername(email: string){
+    return this.http.get(`/authentication/resetusername/${email}`, {observe: 'response'}).pipe(
+      tap((res: HttpResponse<any>) => {
+        console.log(res);
+      })
+    );
+  }
+
+  sendPassword(email: string){
+    return this.http.put('/authentication/resetpassword', {email}, {observe: 'response'}).pipe(
+      tap((res: HttpResponse<any>) => {
+        console.log(res);
+      })
+    );
+  }
+
+  resetPassword(token: string){
+    return this.http.get(`/authentication/newpassword/${token}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        console.log(res);
+      })
+    );
+  }
+
+  savePassword(email: string, password: string){
+    return this.http.put('/authentication/savepassword', {email, password}, {observe: 'response'}).pipe(
+      tap((res: HttpResponse<any>) => {
+        console.log(res);
+      })
+    );
+  }
+
   getAccessToken(){
-    return localStorage.getItem('token');
+    return localStorage.getItem('x-access-token');
+  }
+
+  getRefreshToken(){
+    return localStorage.getItem('x-refresh-token');
+  }
+
+  getUserId(){
+    return localStorage.getItem('user-id');
+  }
+
+  getUsers(){
+    return this.http.get(`/authentication/management`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        console.log(res);
+      })
+    );
+  }
+
+  getEditUser(id: string){
+    return this.http.get(`/authentication/edit/${id}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        // this.userId = res.body._id;
+     })
+    );
+  }
+
+  getOwnEditUser(id: string){
+    return this.http.get(`/authentication/ownedit/${id}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        // this.userId = res.body._id;
+     })
+    );
+  }
+
+  EditUser(id: string, username: string, email: string, permission: string){
+    return this.http.put(`/authentication/edit/${id}`, {username, email, permission}, {observe: 'response'}).pipe(
+      tap((res: HttpResponse<any>) => {
+        // this.userId = res.body._id;
+     })
+    );
+  }
+
+  UploadImg(id: string, username: string, email: string, permission: string, avatar){
+    return this.http.post(`/authentication/profileImg/${id}`, {username, email, permission, avatar}, {observe: 'response'}).pipe(
+      tap((res: HttpResponse<any>) => {
+        // this.userId = res.body._id;
+     })
+    );
+  }
+
+  GetImg(id: string){
+    return this.http.get(`/authentication/profileImg/${id}`, {observe: 'response'}).pipe(
+      tap((res: HttpResponse<any>) => {
+        // this.userId = res.body._id;
+     })
+    );
+  }
+
+  EditOwnUser(id: string, username: string, email: string, permission: string){
+    return this.http.put(`/authentication/ownedit/${id}`, {username, email, permission}, {observe: 'response'}).pipe(
+      tap((res: HttpResponse<any>) => {
+        // this.userId = res.body._id;
+     })
+    );
+  }
+
+  deleteUser(email: string){
+    return this.http.delete(`/authentication/management/${email}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        // this.userId = res.body._id;
+     })
+    );
   }
 
   logout(){
-    this.removeUserData();
+    this.removeSession();
     this.router.navigate(['/']);
   }
 }

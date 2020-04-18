@@ -8,6 +8,10 @@ import { ProfileComponent } from './components/profile/profile.component';
 import { AuthGuardService } from './services/auth-guard.service';
 import { LoginGuardService } from './services/login-guard.service';
 import { BlogComponent } from './components/blog/blog.component';
+import { NewpasswordComponent } from './components/reset/newpassword/newpassword.component';
+import { ActivateComponent } from './components/activation/activate/activate.component';
+import { ManagementComponent } from './components/management/management.component';
+import { PermissionGuardService } from './services/permission-guard.service';
 
 
 const routes: Routes = [
@@ -18,6 +22,9 @@ const routes: Routes = [
   {path: 'login', component: LoginComponent, canActivate: [LoginGuardService]},
   {path: 'profile', component: ProfileComponent, canActivate: [AuthGuardService]},
   {path: 'blog', component: BlogComponent, canActivate: [AuthGuardService]},
+  {path: 'newpassword/:token', component: NewpasswordComponent, canActivate: [LoginGuardService]},
+  {path: 'activate/:token', component: ActivateComponent, canActivate: [LoginGuardService]},
+  {path: 'management', component: ManagementComponent, canActivate: [PermissionGuardService]},
   {path: '**', redirectTo: 'home'}
 ];
 
