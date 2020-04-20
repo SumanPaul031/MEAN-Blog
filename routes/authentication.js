@@ -176,6 +176,7 @@ module.exports = (router) => {
             })
         }
     });
+    
 
     router.post('/login', (req, res) => {
         if(!req.body.username){
@@ -613,6 +614,123 @@ module.exports = (router) => {
     router.get('/me', (req, res) => {
         res.send(req.decoded);
     });
+
+    router.get('/users', (req, res) => {
+        User.find({}, (err, users) => {
+            if(err){
+                console.log('Unknown Error')
+                res.json({ success: false, message: err });
+            } else{
+                User.findOne({ email: req.decoded.email }, (err, mainUser) => {
+                    if(err){
+                        console.log('Error while finding main user')
+                        res.json({ success: false, message: err });
+                    } else{
+                        if(!mainUser){
+                            console.log('Main User Not Found');
+                            res.json({ success: false, message: 'Main User Not Found' });
+                        } else{
+                            if(!users){
+                                res.json({
+                                    success: false,
+                                    message: 'No users Found'
+                                })
+                            } else{
+                                res.json({
+                                    success: true,
+                                    users: users
+                                })
+                            }
+                        }
+                    }
+                });
+            }
+        })
+    });
+
+    router.get('/displayUsers/:username', (req, res) => {
+        if(!req.params.username){
+            res.json({ success: false });
+        } else{
+            User.find({ "username": new RegExp(req.params.username, 'i') }).exec((err, users) => {
+                if(err){
+                    res.json({ success: false, message: err });
+                } else{
+                    User.findOne({ email: req.decoded.email }, (err, mainUser) => {
+                        if(err){
+                            console.log('Error while finding main user')
+                            res.json({ success: false, message: err });
+                        } else{
+                            if(!mainUser){
+                                console.log('Main User Not Found');
+                                res.json({ success: false, message: 'Main User Not Found' });
+                            } else{
+                                if(!users){
+                                    res.json({
+                                        success: false,
+                                        message: 'No users Found'
+                                    })
+                                } else{
+                                    res.json({
+                                        success: true,
+                                        users: users
+                                    })
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    })
+
+    router.get('/profiledisplay/:username', (req, res) => {
+        if(!req.params.username){
+            res.json({ success: false });
+        } else{
+            User.findOne({ username: req.params.username }).exec((err, user) => {
+                if(err){
+                    res.json({ success: false, message: err });
+                } else{
+                    User.findOne({ email: req.decoded.email }, (err, mainUser) => {
+                        if(err){
+                            console.log('Error while finding main user')
+                            res.json({ success: false, message: err });
+                        } else{
+                            if(!mainUser){
+                                console.log('Main User Not Found');
+                                res.json({ success: false, message: 'Main User Not Found' });
+                            } else{
+                                if(!user){
+                                    res.json({
+                                        success: false,
+                                        message: 'No user Found'
+                                    })
+                                } else{
+                                    if(mainUser.permission === 'user' && (user.permission === 'moderator' || user.permission === 'admin')){
+                                        res.json({
+                                            success: false,
+                                            message: 'You do not have the permission to view this user'
+                                        })
+                                    } else if(mainUser.permission === 'moderator' && (user.permission === 'admin')){
+                                        res.json({
+                                            success: false,
+                                            message: 'You do not have the permission to view this user'
+                                        })
+                                    } else{
+                                        res.json({
+                                            success: true,
+                                            user: user
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    })
 
     router.get('/management', (req, res) => {
         User.find({}, (err, users) => {

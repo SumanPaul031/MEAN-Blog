@@ -1,99 +1,87 @@
 import { Component, OnInit } from '@angular/core';
+import { DataSharingService } from 'src/app/services/data-sharing.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
-import { DataSharingService } from 'src/app/services/data-sharing.service';
-import { FormGroup, FormBuilder, FormControl, FormGroupDirective, NgForm, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
+import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
-  selector: 'app-navbar',
-  templateUrl: './navbar.component.html',
-  styleUrls: ['./navbar.component.css']
+  selector: 'app-profiledisplay',
+  templateUrl: './profiledisplay.component.html',
+  styleUrls: ['./profiledisplay.component.css']
 })
-export class NavbarComponent implements OnInit {
+export class ProfiledisplayComponent implements OnInit {
 
-  isCollapsed = true;
   isUserLoggedIn: boolean;
-  val: boolean;
-  username;
-  avatarImg: object;
-
+  mainusername;
   isAdmin: boolean;
   isModerator: boolean;
   isGuest: boolean;
+  mainAvatarImg: object;
+  val: boolean;
+  mainid: string;
+  mainemail: string;
+  mainpermission: string;
+
+  mainhasProfileImg: boolean;
+  mainpath;
 
   hasProfileImg: boolean;
+  username: string;
+  email: string;
   path;
 
-  id;
-
-  myControl = new FormControl();
-  // options: string[] = ['Delhi', 'Mumbai', 'Banglore'];
-  public options = [
-    "Burgers",
-    "Sandwiches",
-    "French Fries",
-    "Milkshakes",
-    "Taco",
-    "Biscuit",
-    "Cookies",
-    "Hot Dog",
-    "Pizza",
-    "Pancake"
-  ];
-
   users;
-  // public search1 = '';
-  formusername = new FormControl('', [Validators.required]);
-  editusername: string;
 
-  loading: boolean = true;
+  loading: boolean = false;
 
-  constructor(private authService: AuthService, 
-    private toastr: ToastrService,
+  constructor(
     private dataSharingService: DataSharingService,
-    private router: Router,
-    private sanitizer: DomSanitizer) { 
+    private authService: AuthService,
+    private toastr: ToastrService,
+    private sanitizer: DomSanitizer,
+    private activatedRoute: ActivatedRoute,
+    private router: Router) { 
       this.dataSharingService.isUserLoggedIn.subscribe( value => {
         this.isUserLoggedIn = value;
       });
-
+  
       this.dataSharingService.username.subscribe( value => {
-        this.username = value;
+        this.mainusername = value;
       });
 
       this.dataSharingService.Admin.subscribe( value => {
         this.isAdmin = value;
       });
-
+  
       this.dataSharingService.Moderator.subscribe( value => {
         this.isModerator = value;
       });
-
+  
       this.dataSharingService.Guest.subscribe( value => {
         this.isGuest = value;
       });
 
       this.dataSharingService.avatarImg.subscribe( value => {
-        this.avatarImg = value;
+        this.mainAvatarImg = value;
       });
 
       this.dataSharingService.users.subscribe( value => {
         this.users = value;
       });
-  }
 
-  // selectedStatic(result) {
-  //   this.search1 = result;
-  // }
+      this.activatedRoute.params.subscribe((params) => {
+        this.username = params['username'];
+      });
+  }
 
   ngOnInit(): void {
     this.val = localStorage.getItem('x-access-token') ? true : false;
 
     if(this.val){
       this.authService.getUser().subscribe((res: HttpResponse<any>) => {
+        // console.log(res);
         this.isGuest = res.body.permission === 'user' ? true : false;
           if(!this.isGuest){
             this.isAdmin = res.body.permission === 'admin' ? true : false;
@@ -113,11 +101,21 @@ export class NavbarComponent implements OnInit {
             this.dataSharingService.Admin.next(false);
             this.dataSharingService.Guest.next(true);
           }
-          this.id = res.body._id;
+
+          // console.log(res.body._id);
+          this.mainpermission = res.body.permission;
+          this.mainusername = res.body.username;
+          this.mainemail = res.body.email;
+          this.mainid = res.body._id;
           this.dataSharingService.isUserLoggedIn.next(true);
           this.dataSharingService.username.next(res.body.username);
-          this.displayImg(this.id);
-          this.findUsers(this.id)
+          
+          this.displayImg(this.mainid);
+
+          this.profileDisplay(this.username);
+
+          this.findUsers(this.mainid);
+
           this.loading = false;
       }, 
       (error: HttpErrorResponse) => {
@@ -152,8 +150,8 @@ export class NavbarComponent implements OnInit {
         // this.loading = false;
         this.users = mid.map(item => item.username);
         this.dataSharingService.users.next(this.users);
-        console.log(typeof this.users);
-        console.log(this.users);
+        // console.log(typeof this.users);
+        // console.log(this.users);
       } else{
         console.log(res.body.message);
         // this.loading = false;
@@ -167,53 +165,47 @@ export class NavbarComponent implements OnInit {
     });
   }
 
-  displayUserProfile(){
-    // console.log(this.editusername);
-    this.isCollapsed = !this.isCollapsed;
-    this.authService.displayUsers(this.editusername).subscribe((res: HttpResponse<any>) => {
-      if(res.body.success){
-        console.log(res.body.users.length);
-        if(res.body.users.length > 1){
-          this.router.navigate(['/users', this.editusername]);
-        } else{
-          this.router.navigate(['/profiledisplay', this.editusername]);
-        }
-      } else{
-        console.log(res.body.message);
-        this.toastr.error(res.body.message, 'Failure');
-        // this.loading = false;
-      }
-    },
-    (error: HttpErrorResponse) => {
-      console.log(error.error.message);
-      // this.loading = false;
-    });
-  }
-
   displayImg(id: string){
     this.authService.GetImg(id).subscribe((res: HttpResponse<any>) => {
       if(res.body.success){
-        this.hasProfileImg = true;
+        this.mainhasProfileImg = true;
         // this.path = res.body.path;
-        this.path = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
-        this.dataSharingService.avatarImg.next(this.path);
+        this.mainpath = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
+        this.dataSharingService.avatarImg.next(this.mainpath);
       } else{
-        this.hasProfileImg = false;
+        this.mainhasProfileImg = false;
         this.dataSharingService.avatarImg.next({});
       }
     }, (err: HttpErrorResponse) => {
-      this.hasProfileImg = false;
+      this.mainhasProfileImg = false;
       this.dataSharingService.avatarImg.next({});
     })
   }
 
-  onLogoutBtnClick(){
-    this.isCollapsed = !this.isCollapsed;
-    this.authService.logout();
-    this.toastr.success('You have Logged Out successfully', 'Success');
-    this.router.navigate(['/']);
-    this.dataSharingService.isUserLoggedIn.next(false);
-    this.dataSharingService.username.next('');
+  profileDisplay(username: string){
+    this.authService.profileDisplay(username).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.authService.GetImg(res.body.user._id).subscribe((res: HttpResponse<any>) => {
+          if(res.body.success){
+            this.hasProfileImg = true;
+            this.path = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
+          } else{
+            this.hasProfileImg = false;
+          }
+        }, (err: HttpErrorResponse) => {
+          this.hasProfileImg = false;
+        })
+        this.username = res.body.user.username;
+        this.email = res.body.user.email;
+      } else{
+        console.log(res.body);
+        this.toastr.error(res.body.message, 'Failure');
+        this.router.navigate(['/']);
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+      this.router.navigate(['/']);
+    })
   }
 
 }

@@ -4,6 +4,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { DataSharingService } from 'src/app/services/data-sharing.service';
 import { ToastrService } from 'ngx-toastr';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-management',
@@ -15,10 +16,12 @@ export class ManagementComponent implements OnInit {
   loading: boolean = true;
 
   users;
+  users1;
 
   isMainAdmin: boolean;
   isMainModerator: boolean;
   isMainGuest: boolean;
+  avatarImg: object;
 
   isUserLoggedIn: boolean;
 
@@ -44,10 +47,14 @@ export class ManagementComponent implements OnInit {
   mainUserId;
   mainUserEmail;
 
+  hasProfileImg: boolean;
+  path;
+
   constructor(
     private authService: AuthService, 
     private dataSharingService: DataSharingService, 
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private sanitizer: DomSanitizer
   ) { 
     this.dataSharingService.isUserLoggedIn.subscribe( value => {
       this.isUserLoggedIn = value;
@@ -67,6 +74,14 @@ export class ManagementComponent implements OnInit {
 
     this.dataSharingService.Guest.subscribe( value => {
       this.isMainGuest = value;
+    });
+
+    this.dataSharingService.avatarImg.subscribe( value => {
+      this.avatarImg = value;
+    });
+
+    this.dataSharingService.users.subscribe( value => {
+      this.users = value;
     });
   }
 
@@ -95,6 +110,7 @@ export class ManagementComponent implements OnInit {
         this.mainUserEmail = res.body.email;
         this.dataSharingService.isUserLoggedIn.next(true);
         this.dataSharingService.username.next(res.body.username);
+        this.displayImg(res.body._id);
     }, 
     (error: HttpErrorResponse) => {
       // console.log(error.error);
@@ -106,18 +122,49 @@ export class ManagementComponent implements OnInit {
     this.getUsers();
   }
 
+  displayImg(id: string){
+    this.authService.GetImg(id).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.hasProfileImg = true;
+        // this.path = res.body.path;
+        this.path = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
+        this.dataSharingService.avatarImg.next(this.path);
+      } else{
+        this.hasProfileImg = false;
+        this.dataSharingService.avatarImg.next({});
+      }
+    }, (err: HttpErrorResponse) => {
+      this.hasProfileImg = false;
+      this.dataSharingService.avatarImg.next({});
+    })
+  }
+
   getUsers(){
     this.authService.getUsers().subscribe((res: HttpResponse<any>) => {
       if(res.body.success){
-        this.users = res.body.users.filter((item) => item.email !== this.mainUserEmail);
+        this.users1 = res.body.users.filter(item => {
+          if(item._id === this.mainUserId){
+            return false;
+          }
+          if(this.isMainGuest && ((item.permission === 'moderator') || (item.permission === 'admin'))){
+            return false;
+          }
+          if(this.isMainModerator && (item.permission === 'admin')){
+            return false;
+          }
+          return true;
+        });
+        this.dataSharingService.users.next(this.users1);
         this.loading = false;
       } else{
         console.log(res.body.message);
+        this.dataSharingService.users.next([]);
         this.loading = false;
       }
     },
     (error: HttpErrorResponse) => {
       console.log(error.error.message);
+      this.dataSharingService.users.next([]);
       this.loading = false;
     });
   }

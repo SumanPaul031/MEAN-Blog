@@ -43,3 +43,61 @@
 .navbar-toggler[aria-expanded="false"] .bottom-bar {
     transform: rotate(0);
 }
+
+/* img {
+    height: auto;
+    width: 100%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    border-radius: 50%;
+} */
+
+.clipped {
+    clip-path: circle();
+}
+
+.has-search .form-control {
+    padding-left: 2.375rem;
+}
+
+/* @media (max-width: 768px) {
+    .navbar-collapse {
+        position: absolute;
+        top: 54px;
+        right: 100%;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-bottom: 15px;
+        width: 100%;
+        transition: all 0.3s ease;
+        display: block;
+    }
+    .navbar-collapse.collapsing {
+        height: auto !important;
+        margin-right: 50%;
+        transition: all 0.3s ease;
+        display: block;
+    }
+    .navbar-collapse.show {
+        right: 0;
+    }
+} */
+
+@media (max-width: 767px){
+  /* body {
+    padding: 0;
+  } */
+
+  .navbar{
+    margin-left:0;
+    margin-right:0;
+    padding-left:0;
+    padding-right:0;
+  }
+
+  #li1{
+      margin-bottom: 1rem;
+  }
+}

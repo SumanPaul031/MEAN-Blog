@@ -34,6 +34,30 @@ export class AuthService {
     )
   }
 
+  findUsers(){
+    return this.http.get(`/authentication/users`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        // console.log(res);
+      })
+    )
+  }
+
+  displayUsers(username: string){
+    return this.http.get(`/authentication/displayUsers/${username}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        // console.log(res);
+      })
+    )
+  } 
+
+  profileDisplay(username: string){
+    return this.http.get(`/authentication/profiledisplay/${username}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+        // console.log(res);
+      })
+    )
+  }
+
   login(user){
     return this.http.post(`/authentication/login`, user, { observe: 'response' }).pipe(
       tap((res: HttpResponse<any>) => {

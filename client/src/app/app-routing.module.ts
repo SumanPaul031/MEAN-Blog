@@ -11,6 +11,8 @@ import { BlogComponent } from './components/blog/blog.component';
 import { NewpasswordComponent } from './components/reset/newpassword/newpassword.component';
 import { ActivateComponent } from './components/activation/activate/activate.component';
 import { ManagementComponent } from './components/management/management.component';
+import { ProfiledisplayComponent } from './components/profiledisplay/profiledisplay.component';
+import { UsersComponent } from './components/users/users.component';
 import { PermissionGuardService } from './services/permission-guard.service';
 
 
@@ -25,6 +27,8 @@ const routes: Routes = [
   {path: 'newpassword/:token', component: NewpasswordComponent, canActivate: [LoginGuardService]},
   {path: 'activate/:token', component: ActivateComponent, canActivate: [LoginGuardService]},
   {path: 'management', component: ManagementComponent, canActivate: [PermissionGuardService]},
+  {path: 'profiledisplay/:username', component: ProfiledisplayComponent, canActivate: [AuthGuardService]},
+  {path: 'users/:username', component: UsersComponent, canActivate: [AuthGuardService]},
   {path: '**', redirectTo: 'home'}
 ];
 

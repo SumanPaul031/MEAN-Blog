@@ -1,0 +1,45 @@
+<mat-spinner *ngIf="loading"></mat-spinner>
+
+<ng-template [ngIf]="!loading">
+  <h1 class="page-header">{{username}}'s Profile</h1>
+  <br>
+
+  <!-- <mat-spinner *ngIf="imgloading"></mat-spinner> -->
+
+  <div *ngIf="!hasProfileImg" class="container">
+    <div class="row">
+      <div class="col-md-4 m-auto">
+        <!-- <i class="fa fa-user"></i> -->
+        <img src="../../../assets/placeholder.png" style="max-height: 300px; max-width: 300px;" alt="Profile Image">
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="hasProfileImg" class="container">
+    <div class="row">
+      <div class="col-md-4 m-auto">
+        <h4>Profile Image:</h4>
+        <img [src]="path" style="max-height: 300px; max-width: 300px;" alt="Profile Image">
+      </div>
+    </div>
+  </div>
+
+  <br>
+  <table class="table table-striped">
+      <thead class="thead-dark">
+          <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Value</th>
+          </tr>
+      </thead>
+      <tbody>
+          <tr>
+              <th scope="row">Username</th>
+              <td>{{username}}</td>
+          </tr>
+          <tr>
+              <th scope="row">Email</th>
+              <td>{{email}}</td>
+          </tr>
+      </tbody>
+  </table>

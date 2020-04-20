@@ -1,4 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+<nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-primary">
     <div class="container">
         <a class="navbar-brand" href="#">MEAN Blog</a>
         <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
@@ -12,7 +12,7 @@
             <span class="icon-bar bottom-bar"></span>
         </button>
 
-        <div class="collapse navbar-collapse"  id="navbarText" [ngbCollapse]="isCollapsed">
+        <div class="collapse navbar-collapse"  id="navbarText" [ngbCollapse]="!isCollapsed ? isCollapsed : isCollapsed">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
                     <a class="nav-link" [routerLink]="['/']">Home</a>
@@ -21,6 +21,26 @@
 
             <!-- <div *ngIf="!loading && isUserLoggedIn; then LoggedIn"></div> -->
                 <ng-template [ngIf]="!loading && isUserLoggedIn">
+                    <div class="input-group col-md-4">
+                        <input list="usernamesearch" class="form-control py-2 border-right-0 border" [formControl]="formusername" [(ngModel)]="editusername" type="search" class="form-control" placeholder="Search username">
+                        <!-- <input type="text" class="form-control py-2 border-right-0 border" placeholder="Enter Location" (keyup)="displayOptions($event)" matInput [formControl]="myControl" [matAutocomplete]="auto">
+                        <mat-autocomplete #auto="matAutocomplete">
+                            <mat-option *ngFor="let option of options" [value]="option">
+                                {{option}}
+                            </mat-option>
+                        </mat-autocomplete> -->
+                        <div class="input-group-append">
+                            <button [disabled]="formusername.invalid" class="btn btn-outline-secondary border-left-0 border" type="button" (click)="displayUserProfile()">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </div> 
+                        <datalist id="usernamesearch">
+                            <option *ngFor="let user of users" [value]="user">
+                            <!-- <option value="small">
+                            <option value="medium">
+                            <option value="larges"> -->
+                        </datalist>
+                    </div>
                     <ul class="navbar-nav ml-auto">
                         <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
                             <a class="nav-link" [routerLink]="['/blog']">Blog</a>
@@ -31,11 +51,16 @@
                         <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
                             <a class="nav-link" [routerLink]="['/dashboard']">Dashboard</a>
                         </li>
-                        <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                        <li *ngIf="!hasProfileImg" class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
                             <a class="nav-link" [routerLink]="['/profile']">Hello, <b>{{username}}</b></a>
                         </li>
+                        <li *ngIf="hasProfileImg" class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                            <a class="nav-link" [routerLink]="['/profile']" style="padding-top: 7px; padding-bottom: 7px;"><img [src]="path" style="height: 40px; width: 40px;" class="clipped" alt="Profile Image"></a>
+                        </li>
+                        <li class="nav-item" id="li1" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                            <a class="nav-link" style="padding-top: 0.78rem; padding-bottom: 0.78rem;"><button class="btn btn-danger btn-sm" (click)="onLogoutBtnClick()" data-toggle="collapse" data-target=".navbar-collapse.show">Logout</button></a>
+                        </li>
                     </ul>
-                    <button class="btn btn-danger" (click)="onLogoutBtnClick()" data-toggle="collapse" data-target=".navbar-collapse.show">Logout</button>
                 </ng-template>
 
 
@@ -44,7 +69,7 @@
                         <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
                             <a class="nav-link" [routerLink]="['/login']">Login</a>
                         </li>
-                        <li class="nav-item" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
+                        <li class="nav-item" id="li1" (click)="isCollapsed = !isCollapsed" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact:true}" data-toggle="collapse" data-target=".navbar-collapse.show">
                             <a class="nav-link" [routerLink]="['/register']">Register</a>
                         </li>
                     </ul>

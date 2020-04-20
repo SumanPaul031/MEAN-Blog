@@ -8,7 +8,7 @@
             <span class="fa fa-search form-control-feedback"></span>
             <input id="usernameInput" type="text" (keyup)="usernameSearch()" class="form-control" placeholder="Search by Username...">
         </div>
-        <div class="form-group has-search">
+        <div class="form-group has-search" style="margin-left: 0.4rem;">
             <span class="fa fa-search form-control-feedback"></span>
             <input id="emailInput" type="text" (keyup)="emailSearch()" class="form-control" placeholder="Search by Email...">
         </div>
@@ -24,13 +24,13 @@
                 </tr>
             </thead>
             <tbody>
-                <tr *ngFor="let user of users | paginate: { itemsPerPage: pageSize, currentPage: p }">
+                <tr *ngFor="let user of users1 | paginate: { itemsPerPage: pageSize, currentPage: p }">
                     <td>{{user.username}}</td>
                     <td>{{user.email}}</td>
-                    <td>
+                    <td class="container">
                         <!-- <button class="button" [routerLink]="['/edit', user._id]"><i class="fas fa-edit"></i></button> -->
-                        <button class="button" data-toggle="modal" (click)="onEditClick(user._id)" data-target="#editModal"><i class="fa fa-edit"></i></button>
-                        <button class="button btn-danger" *ngIf="isMainAdmin" data-toggle="modal" (click)="DeleteClick(user._id)" data-target="#deleteModal"><i class="fa fa-trash"></i></button>
+                        <button class="button btn-success" data-toggle="modal" (click)="onEditClick(user._id)" data-target="#editModal" style="max-width: 40px;"><i class="fa fa-edit"></i></button>
+                        <button class="button btn-danger" *ngIf="isMainAdmin" data-toggle="modal" (click)="DeleteClick(user._id)" data-target="#deleteModal" style="margin-left: 0.4rem; max-width: 40px;"><i class="fa fa-trash"></i></button>
                     </td>
                 </tr>
             </tbody>
@@ -70,7 +70,7 @@
                     <input [disabled]="(!callerIsAdmin && isAdmin)" [formControl]="formusername" type="text" name="username" class="form-control" [(ngModel)]="editusername" id="username" placeholder="Enter Userame..." required>
                     <mat-error *ngIf="formusername.invalid">{{usernameErrorMessage()}}</mat-error>
                     <br>
-                    <label for="email">Name</label>
+                    <label for="email">Email</label>
                     <input [disabled]="(!callerIsAdmin && isAdmin)" [formControl]="formemail" type="text" name="email" class="form-control" [(ngModel)]="editemail" id="email" placeholder="Enter Email..." required>
                     <mat-error *ngIf="formemail.invalid">{{emailErrorMessage()}}</mat-error>
                     <br>

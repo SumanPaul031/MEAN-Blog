@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { DataSharingService } from 'src/app/services/data-sharing.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { DomSanitizer } from '@angular/platform-browser';
+import { FormGroup, FormBuilder, FormControl, FormGroupDirective, NgForm, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-blog',
@@ -17,10 +19,25 @@ export class BlogComponent implements OnInit {
   isAdmin: boolean;
   isModerator: boolean;
   isGuest: boolean;
+  avatarImg: object;
+
+  users;
+
+  formtitle = new FormControl('', [Validators.required]);
+  formbody = new FormControl('', [Validators.required]);
+
+  edittitle: string;
+  editbody: string;
+
+  hasProfileImg: boolean;
+  path;
+
+  newPost: boolean = false;
 
   constructor(
     private dataSharingService: DataSharingService,
-    private authService: AuthService
+    private authService: AuthService,
+    private sanitizer: DomSanitizer
   ) { 
     this.dataSharingService.isUserLoggedIn.subscribe( value => {
       this.isUserLoggedIn = value;
@@ -40,6 +57,14 @@ export class BlogComponent implements OnInit {
 
     this.dataSharingService.Guest.subscribe( value => {
       this.isGuest = value;
+    });
+
+    this.dataSharingService.avatarImg.subscribe( value => {
+      this.avatarImg = value;
+    });
+
+    this.dataSharingService.users.subscribe( value => {
+      this.users = value;
     });
   }
 
@@ -70,6 +95,8 @@ export class BlogComponent implements OnInit {
           this.username = res.body.username;
           this.dataSharingService.isUserLoggedIn.next(true);
           this.dataSharingService.username.next(res.body.username);
+          this.displayImg(res.body._id);
+          this.findUsers(res.body._id);
       }, 
       (error: HttpErrorResponse) => {
         // console.log(error.error);
@@ -81,6 +108,80 @@ export class BlogComponent implements OnInit {
       this.dataSharingService.isUserLoggedIn.next(false);
       this.dataSharingService.username.next('');
     }
+  }
+
+  findUsers(id: string){
+    this.authService.findUsers().subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        const mid = res.body.users.filter(item => {
+          if(item._id === id){
+            return false;
+          }
+          if(this.isGuest && ((item.permission === 'moderator') || (item.permission === 'admin'))){
+            return false;
+          }
+          if(this.isModerator && (item.permission === 'admin')){
+            return false;
+          }
+          return true;
+        });
+        // this.loading = false;
+        this.users = mid.map(item => item.username);
+        this.dataSharingService.users.next(this.users);
+        // console.log(typeof this.users);
+        // console.log(this.users);
+      } else{
+        console.log(res.body.message);
+        // this.loading = false;
+        this.dataSharingService.users.next([]);
+      }
+    },
+    (error: HttpErrorResponse) => {
+      console.log(error.error.message);
+      // this.loading = false;
+      this.dataSharingService.users.next([]);
+    });
+  }
+
+  displayImg(id: string){
+    this.authService.GetImg(id).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.hasProfileImg = true;
+        // this.path = res.body.path;
+        this.path = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
+        this.dataSharingService.avatarImg.next(this.path);
+      } else{
+        this.hasProfileImg = false;
+        this.dataSharingService.avatarImg.next({});
+      }
+    }, (err: HttpErrorResponse) => {
+      this.hasProfileImg = false;
+      this.dataSharingService.avatarImg.next({});
+    })
+  }
+
+  titleErrorMessage(){
+    if (this.formtitle.hasError('required')) {
+      return 'You must enter a title';
+    } else {
+      return '';
+    }
+  }
+
+  bodyErrorMessage(){
+    if (this.formbody.hasError('required')) {
+      return 'You must enter a body';
+    } else {
+      return '';
+    }
+  }
+
+  NewBlogOpen(){
+    this.newPost = true;
+  }
+
+  NewBlogClose(){
+    this.newPost = false;
   }
 
 }

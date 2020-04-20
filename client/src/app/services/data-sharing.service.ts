@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { Binary } from '@angular/compiler';
 
 @Injectable({
   providedIn: 'root'
@@ -19,4 +20,8 @@ export class DataSharingService {
   public Moderator: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   public Guest: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+
+  public avatarImg: BehaviorSubject<object> = new BehaviorSubject<object>({});
+
+  public users: BehaviorSubject<object> = new BehaviorSubject<object>([]);
 }

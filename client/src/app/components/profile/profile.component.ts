@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Pipe } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { DataSharingService } from 'src/app/services/data-sharing.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { ToastrService } from 'ngx-toastr';
@@ -23,6 +23,7 @@ export class ProfileComponent implements OnInit {
   isAdmin: boolean;
   isModerator: boolean;
   isGuest: boolean;
+  avatarImg: object;
 
   formusername = new FormControl('', [Validators.required, Validators.minLength(3), Validators.maxLength(15), Validators.pattern('^[a-zA-Z0-9]+$')]);
   formemail = new FormControl('', [Validators.required, Validators.minLength(5), Validators.maxLength(30), Validators.email]);
@@ -44,6 +45,8 @@ export class ProfileComponent implements OnInit {
   hasProfileImg: boolean;
   path;
 
+  users;
+
   loading: boolean = true;
 
   @ViewChild('myPond') myPond: any;
@@ -58,54 +61,33 @@ export class ProfileComponent implements OnInit {
  
   pondFiles = []
  
-  pondHandleInit() {
-    // console.log('FilePond has initialised', this.myPond);
-  }
+  pondHandleInit() {}
  
   pondHandleAddFile($event) {
-    // console.log('A file was added', $event.file.file);
     this.imgAdded = true;
-    // this.file = event;
     this.readThis($event.file);
-    // console.log(this.image);
-    // this.displayCode();
   }
 
   pondHandleRemoveFile(event: any) {
-    // console.log('A file was removed', event);
     this.imgAdded = false;
   }
 
-  changeListener($event) : void {
-    // console.log($event.target.files[0]);
-    // this.readThis($event.target);
-    // console.log(this.image);
-  }
-
   readThis(inputValue: any): void {
-    // var file:File = inputValue.files[0];
     var file:File = inputValue.file;
-    // console.log('File is: '+file);
     var myReader:FileReader = new FileReader();
   
     myReader.onloadend = (e) => {
       this.image = myReader.result;
-      // console.log(this.image);
       this.displayCode();
     }
-    // console.log('Encoded Image: '+this.image);
     myReader.readAsDataURL(file);
   }
 
   displayCode(){
-    // console.log(this.image);
-    // console.log(this.image.split(";")[0].slice(5));
-    // console.log(this.image.split(";")[1].slice(7));
     const avatar = {
       type: this.image.split(";")[0].slice(5),
       data: this.image.split(";")[1].slice(7)
     }
-    // console.log(avatar);
     return avatar;
   }
 
@@ -133,11 +115,16 @@ export class ProfileComponent implements OnInit {
       this.dataSharingService.Guest.subscribe( value => {
         this.isGuest = value;
       });
-    }
 
-  // transform(html) {
-  //     return this.sanitizer.bypassSecurityTrustResourceUrl(html);
-  // }
+      this.dataSharingService.avatarImg.subscribe( value => {
+        this.avatarImg = value;
+      });
+
+      this.dataSharingService.users.subscribe( value => {
+        this.users = value;
+      });
+  }
+
 
   ngOnInit(): void {
     
@@ -173,18 +160,9 @@ export class ProfileComponent implements OnInit {
           this.id = res.body._id;
           this.dataSharingService.isUserLoggedIn.next(true);
           this.dataSharingService.username.next(res.body.username);
-
-          // this.authService.GetImg(this.id).subscribe((res: HttpResponse<any>) => {
-          //   if(res.body.success){
-          //     this.hasProfileImg = true;
-          //     this.path = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
-          //   } else{
-          //     this.hasProfileImg = false;
-          //   }
-          // }, (err: HttpErrorResponse) => {
-          //   this.hasProfileImg = false;
-          // })
+          
           this.displayImg(this.id);
+          this.findUsers(this.id);
 
           this.loading = false;
       }, 
@@ -202,17 +180,53 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+  findUsers(id: string){
+    this.authService.findUsers().subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        const mid = res.body.users.filter(item => {
+          if(item._id === id){
+            return false;
+          }
+          if(this.isGuest && ((item.permission === 'moderator') || (item.permission === 'admin'))){
+            return false;
+          }
+          if(this.isModerator && (item.permission === 'admin')){
+            return false;
+          }
+          return true;
+        });
+        // this.loading = false;
+        this.users = mid.map(item => item.username);
+        this.dataSharingService.users.next(this.users);
+        // console.log(typeof this.users);
+        // console.log(this.users);
+      } else{
+        console.log(res.body.message);
+        // this.loading = false;
+        this.dataSharingService.users.next([]);
+      }
+    },
+    (error: HttpErrorResponse) => {
+      console.log(error.error.message);
+      // this.loading = false;
+      this.dataSharingService.users.next([]);
+    });
+  }
+
   displayImg(id: string){
     this.authService.GetImg(id).subscribe((res: HttpResponse<any>) => {
       if(res.body.success){
         this.hasProfileImg = true;
         // this.path = res.body.path;
         this.path = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
+        this.dataSharingService.avatarImg.next(this.path);
       } else{
         this.hasProfileImg = false;
+        this.dataSharingService.avatarImg.next({});
       }
     }, (err: HttpErrorResponse) => {
       this.hasProfileImg = false;
+      this.dataSharingService.avatarImg.next({});
     })
   }
 

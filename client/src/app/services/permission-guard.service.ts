@@ -3,6 +3,7 @@ import { Router, CanActivate } from '@angular/router';
 import { DataSharingService } from './data-sharing.service';
 import { AuthService } from './auth.service';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Injectable({
   providedIn: 'root'
@@ -16,8 +17,18 @@ export class PermissionGuardService implements CanActivate {
   isAdmin: boolean;
   isModerator: boolean;
   isGuest: boolean;
+  avatarImg: object;
 
-  constructor(private router: Router, private dataSharingService: DataSharingService, private authService: AuthService) { 
+  users;
+
+  hasProfileImg: boolean;
+  path;
+
+  constructor(
+    private router: Router, 
+    private dataSharingService: DataSharingService, 
+    private authService: AuthService, 
+    private sanitizer: DomSanitizer) { 
     this.dataSharingService.isUserLoggedIn.subscribe( value => {
       this.isUserLoggedIn = value;
     });
@@ -36,6 +47,14 @@ export class PermissionGuardService implements CanActivate {
 
     this.dataSharingService.Guest.subscribe( value => {
       this.isGuest = value;
+    });
+
+    this.dataSharingService.avatarImg.subscribe( value => {
+      this.avatarImg = value;
+    });
+
+    this.dataSharingService.users.subscribe( value => {
+      this.users = value;
     });
   }
 
@@ -63,6 +82,8 @@ export class PermissionGuardService implements CanActivate {
           }
           this.dataSharingService.isUserLoggedIn.next(true);
           this.dataSharingService.username.next(res.body.username);
+          this.displayImg(res.body._id);
+          this.findUsers(res.body._id);
       }, 
       (error: HttpErrorResponse) => {
         this.authService.logout()
@@ -86,5 +107,44 @@ export class PermissionGuardService implements CanActivate {
       this.router.navigate(['/']);
       return false;
     }
+  }
+
+  findUsers(id: string){
+    this.authService.findUsers().subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        const mid = res.body.users.filter((item) => item._id !== id);
+        // this.loading = false;
+        this.users = mid.map(item => item.username);
+        this.dataSharingService.users.next(this.users);
+        // console.log(typeof this.users);
+        // console.log(this.users);
+      } else{
+        console.log(res.body.message);
+        // this.loading = false;
+        this.dataSharingService.users.next([]);
+      }
+    },
+    (error: HttpErrorResponse) => {
+      console.log(error.error.message);
+      // this.loading = false;
+      this.dataSharingService.users.next([]);
+    });
+  }
+
+  displayImg(id: string){
+    this.authService.GetImg(id).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.hasProfileImg = true;
+        // this.path = res.body.path;
+        this.path = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
+        this.dataSharingService.avatarImg.next(this.path);
+      } else{
+        this.hasProfileImg = false;
+        this.dataSharingService.avatarImg.next({});
+      }
+    }, (err: HttpErrorResponse) => {
+      this.hasProfileImg = false;
+      this.dataSharingService.avatarImg.next({});
+    })
   }
 }

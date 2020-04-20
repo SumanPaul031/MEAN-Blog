@@ -1,0 +1,41 @@
+<h1 class="page-header">Users</h1>
+<mat-spinner *ngIf="loading"></mat-spinner>
+
+<div *ngIf="!loading">
+    <!-- <input type="text" id="myInput" placeholder="Search for names.."> -->
+    <div class="container">
+        <div class="form-group has-search">
+            <span class="fa fa-search form-control-feedback"></span>
+            <input id="usernameInput" type="text" (keyup)="usernameSearch()" class="form-control" placeholder="Search by Username...">
+        </div>
+    </div>
+    
+    <div style="overflow-x:auto;">
+        <table id="myTable" class="table table-striped">
+            <thead class="thead-dark">
+                <tr>
+                  <th scope="col" (click)="sortTable(0)" style="cursor: pointer;">Username</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let user of users1 | paginate: { itemsPerPage: pageSize, currentPage: p }">
+                    <!-- <td>{{user.username}}</td> -->
+                    <td *ngIf="((isMainGuest && (user.permission === 'user')) || (isMainModerator && (user.permission === 'moderator' || user.permission === 'user')) || (isMainAdmin))"><a class="nav-link" [routerLink]="['/profiledisplay', user.username]">{{user.username}}</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div style="float: right;">
+        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+    </div>
+    <div style="float: left;">
+        <p>Items per page: </p>
+        <select id="PerPage" class="form-control" [(ngModel)]="pageSize">
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+        </select>
+    </div>
+</div>

@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { Router } from '@angular/router';
 import { DataSharingService } from 'src/app/services/data-sharing.service';
 import { AuthGuardService } from 'src/app/services/auth-guard.service';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-login',
@@ -28,6 +29,12 @@ export class LoginComponent implements OnInit {
   isAdmin: boolean;
   isGuest: boolean;
   isModerator: boolean;
+  avatarImg: object;
+
+  users;
+
+  hasProfileImg: boolean;
+  path;
 
   constructor(
     private formBuilder: FormBuilder, 
@@ -35,7 +42,8 @@ export class LoginComponent implements OnInit {
     private toastr: ToastrService, 
     private router: Router,
     private dataSharingService: DataSharingService,
-    private authGuard: AuthGuardService) { 
+    private authGuard: AuthGuardService,
+    private sanitizer: DomSanitizer) { 
     this.createForm();
 
     this.dataSharingService.isUserLoggedIn.subscribe( value => {
@@ -56,6 +64,14 @@ export class LoginComponent implements OnInit {
 
     this.dataSharingService.Guest.subscribe( value => {
       this.isGuest = value;
+    });
+
+    this.dataSharingService.avatarImg.subscribe( value => {
+      this.avatarImg = value;
+    });
+
+    this.dataSharingService.users.subscribe( value => {
+      this.users = value;
     });
   }
 
@@ -122,7 +138,9 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/profile']);
         this.dataSharingService.isUserLoggedIn.next(true);
         this.dataSharingService.username.next(user.username);
-        console.log('Success: '+res.body.message);
+        this.displayImg(res.body.user._id);
+        this.findUsers(res.body.user._id);
+        // console.log('Success: '+res.body.message);
       } else{
         this.toastr.error(res.body.message, 'Failure');
         this.router.navigate(['/login']);
@@ -147,6 +165,56 @@ export class LoginComponent implements OnInit {
       this.router.navigate(['/login']);
       this.dataSharingService.isUserLoggedIn.next(false);
       this.dataSharingService.username.next('');
+    })
+  }
+
+  findUsers(id: string){
+    this.authService.findUsers().subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        const mid = res.body.users.filter(item => {
+          if(item._id === id){
+            return false;
+          }
+          if(this.isGuest && ((item.permission === 'moderator') || (item.permission === 'admin'))){
+            return false;
+          }
+          if(this.isModerator && (item.permission === 'admin')){
+            return false;
+          }
+          return true;
+        });
+        // this.loading = false;
+        this.users = mid.map(item => item.username);
+        this.dataSharingService.users.next(this.users);
+        // console.log(typeof this.users);
+        // console.log(this.users);
+      } else{
+        console.log(res.body.message);
+        // this.loading = false;
+        this.dataSharingService.users.next([]);
+      }
+    },
+    (error: HttpErrorResponse) => {
+      console.log(error.error.message);
+      // this.loading = false;
+      this.dataSharingService.users.next([]);
+    });
+  }
+
+  displayImg(id: string){
+    this.authService.GetImg(id).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.hasProfileImg = true;
+        // this.path = res.body.path;
+        this.path = this.sanitizer.bypassSecurityTrustResourceUrl(res.body.path);
+        this.dataSharingService.avatarImg.next(this.path);
+      } else{
+        this.hasProfileImg = false;
+        this.dataSharingService.avatarImg.next({});
+      }
+    }, (err: HttpErrorResponse) => {
+      this.hasProfileImg = false;
+      this.dataSharingService.avatarImg.next({});
     })
   }
 

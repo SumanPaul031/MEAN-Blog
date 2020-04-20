@@ -16,7 +16,12 @@ export class NewpasswordComponent implements OnInit {
   email: string;
   token: string;
 
-  constructor(private activatedRoute: ActivatedRoute, private formBuilder: FormBuilder, private authService: AuthService, private toastr: ToastrService, private router: Router) { 
+  constructor(
+    private activatedRoute: ActivatedRoute, 
+    private formBuilder: FormBuilder, 
+    private authService: AuthService, 
+    private toastr: ToastrService, 
+    private router: Router) { 
     this.createForm();
 
     this.activatedRoute.params.subscribe((params) => {

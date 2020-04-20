@@ -1,1 +1,99 @@
 <h1 class="page-header">Blog Feed</h1>
+<button data-toggle="modal" [disabled]="newPost" class="button btn btn-warning" data-target="#newblogModal">New Post</button>
+<button class="button btn btn-info" style="margin-left: 1rem;"><i class="fa fa-refresh"></i></button>
+
+<hr>
+<br>
+
+<div class="card" style="max-width: 700rem;">
+    <!-- <img class="card-img-top" src="img_avatar1.png" alt="Card image"> -->
+    <div class="card-header">
+        <h4 class="card-title">Title</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus perspiciatis blanditiis enim voluptatem eius, in natus culpa neque doloremque et doloribus laudantium aliquam minima est. Iste veniam doloribus ad, possimus quaerat quam dolores veritatis officiis repudiandae dolorem dolore facilis alias nam recusandae ea quia eum itaque quas nulla facere omnis.</p>
+    </div>
+    <div class="card-footer">
+        Posted By: <strong>Suman2031</strong><br>
+        Date: <strong>19th March, 2020</strong><br>
+
+        <div>
+            <a class="dropdown-toggle" role="button" id="likes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-thumbs-up"></i>: <strong>25</strong>
+            </a>
+            <div class="dropdown-menu" aria-labelledby="likes">
+                <a class="dropdown-item" href="#">Action</a>
+                <a class="dropdown-item" href="#">Another action</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+            </div>
+            <!-- <i class="fa fa-thumbs-up"></i>: <strong>25</strong> -->
+            <i class="fa fa-thumbs-down" style="margin-left: 2rem;"></i>: <strong>25</strong>
+        </div>
+        <button class="button btn-success btn-sm" data-toggle="modal" data-target="#newblogModal"><i class="fa fa-edit"></i></button>
+        <button class="button btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal" style="margin-left: 0.4rem;"><i class="fa fa-trash"></i></button>
+
+        <div>
+            <button class="button btn btn-info btn-sm"><i class="fa fa-thumbs-up"></i></button>
+            <button class="button btn btn-danger btn-sm" style="margin-left: 0.7rem;"><i class="fa fa-thumbs-down"></i></button>
+        </div>
+    </div>
+</div>
+
+<!-- Blog Modal -->
+<div class="modal" id="newblogModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+  
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">New Blog</h4>
+          <button type="button" class="close" data-dismiss="modal" (click)="NewBlogClose()">&times;</button>
+        </div>
+  
+        <!-- Modal body -->
+        <div class="modal-body">
+            <form>
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input [formControl]="formtitle" type="text" name="title" class="form-control" [(ngModel)]="edittitle" id="title" placeholder="Enter Title..." required>
+                    <mat-error *ngIf="formtitle.invalid && formtitle.dirty">{{titleErrorMessage()}}</mat-error>
+                    <br>
+                    <label for="body">Body</label>
+                    <textarea [formControl]="formbody" name="body" class="form-control" [(ngModel)]="editbody" id="body" rows="5" required></textarea>
+                    <mat-error *ngIf="formbody.invalid && formbody.dirty">{{bodyErrorMessage()}}</mat-error>
+                </div>
+            </form>
+            <p>Posted By: <strong>Suman2031</strong></p>
+            <p>Date: <strong>19th March, 2020</strong></p>
+        </div>
+  
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button [disabled]="(formtitle.invalid) || (formbody.invalid)" type="button" class="btn btn-primary">Post</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="NewBlogClose()">Close</button>
+        </div>
+  
+      </div>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal" id="deleteModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+  
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Are You Sure You want to Delete "title"?</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+        </div>
+  
+      </div>
+    </div>
+</div>

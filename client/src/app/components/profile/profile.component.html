@@ -15,7 +15,6 @@
             (oninit)="pondHandleInit()"
             (onaddfile)="pondHandleAddFile($event)"
             (onremovefile)="pondHandleRemoveFile($event)"
-            (change)="changeListener($event)"
             allowFileEncode=true>
           </file-pond>
           <button *ngIf="imgAdded" type="button" class="btn btn-success" (click)="avatarUpload()">Upload</button>
@@ -48,14 +47,14 @@
               <th scope="row">Username</th>
               <td>{{username}}</td>
               <td>
-                  <button class="button" data-toggle="modal" (click)="onEditClick()" data-target="#editUsernameModal"><i class="fa fa-edit"></i></button>
+                  <button class="button btn-success" data-toggle="modal" (click)="onEditClick()" data-target="#editUsernameModal"><i class="fa fa-edit"></i></button>
               </td>
           </tr>
           <tr>
               <th scope="row">Email</th>
               <td>{{email}}</td>
               <td>
-                  <button class="button" data-toggle="modal" (click)="onEditClick()" data-target="#editEmailModal"><i class="fa fa-edit"></i></button>
+                  <button class="button btn-success" data-toggle="modal" (click)="onEditClick()" data-target="#editEmailModal"><i class="fa fa-edit"></i></button>
               </td>
           </tr>
       </tbody>
@@ -144,7 +143,6 @@
           (oninit)="pondHandleInit()"
           (onaddfile)="pondHandleAddFile($event)"
           (onremovefile)="pondHandleRemoveFile($event)"
-          (change)="changeListener($event)"
           allowFileEncode=true>
           </file-pond>
           <button *ngIf="imgAdded" type="button" class="btn btn-success" (click)="avatarUpload()" data-dismiss="modal">Upload</button>

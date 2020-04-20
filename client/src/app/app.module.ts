@@ -1,6 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgModule } from '@angular/core';
+import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { NgbCollapseModule, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule, ReactiveFormsModule} from '@angular/forms';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -9,6 +9,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { FilePondModule, registerPlugin } from 'ngx-filepond';
+import { NgxTypeaheadModule } from 'ngx-typeahead';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatInputModule } from '@angular/material/input';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -33,6 +36,8 @@ import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 import FilePondPluginFileEncode from 'filepond-plugin-file-encode';
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import FilePondPluginImageResize from 'filepond-plugin-image-resize';
+import { ProfiledisplayComponent } from './components/profiledisplay/profiledisplay.component';
+import { UsersComponent } from './components/users/users.component';
 
 registerPlugin(FilePondPluginFileValidateType);
 registerPlugin(FilePondPluginFileEncode);
@@ -51,7 +56,9 @@ registerPlugin(FilePondPluginImageResize);
     BlogComponent,
     NewpasswordComponent,
     ActivateComponent,
-    ManagementComponent
+    ManagementComponent,
+    ProfiledisplayComponent,
+    UsersComponent
   ],
   imports: [
     BrowserModule,
@@ -71,7 +78,10 @@ registerPlugin(FilePondPluginImageResize);
     MatProgressSpinnerModule,
     MatFormFieldModule,
     NgxPaginationModule,
-    FilePondModule
+    FilePondModule,
+    NgxTypeaheadModule,
+    MatAutocompleteModule,
+    MatInputModule
   ],
   providers: [
     AuthService,
@@ -81,6 +91,7 @@ registerPlugin(FilePondPluginImageResize);
     {provide: HTTP_INTERCEPTORS, useClass: AuthInterceptorsService, multi: true},
     PermissionGuardService
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA]
 })
 export class AppModule { }
