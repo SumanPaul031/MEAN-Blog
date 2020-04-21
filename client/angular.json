@@ -40,7 +40,8 @@
               "node_modules/filepond-plugin-image-preview/dist/filepond-plugin-image-preview.js",
               "node_modules/filepond-plugin-file-encode/dist/filepond-plugin-file-encode.js",   
               "node_modules/filepond-plugin-image-resize/dist/filepond-plugin-image-resize.js",           
-              "node_modules/filepond/dist/filepond.js"              
+              "node_modules/filepond/dist/filepond.js",
+              "node_modules/glyphicons/glyphicons.js"          
             ]
           },
           "configurations": {

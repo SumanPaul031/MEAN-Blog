@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const authentication = require('./routes/authentication')(router);
+const blogs = require('./routes/blogs')(router);
 
 mongoose.Promise = global.Promise;
 mongoose.connect(config.uri, (err) => {
@@ -29,6 +30,7 @@ app.use(bodyParser.json({limit: '50mb'}));
 app.use(express.static(__dirname + '/client/dist/client/'));
 
 app.use('/authentication', authentication);
+app.use('/blogs', blogs);
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname + '/client/dist/client/index.html'));

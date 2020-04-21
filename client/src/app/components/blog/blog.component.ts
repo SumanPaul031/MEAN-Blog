@@ -4,6 +4,7 @@ import { AuthService } from 'src/app/services/auth.service';
 import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FormGroup, FormBuilder, FormControl, FormGroupDirective, NgForm, Validators } from '@angular/forms';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-blog',
@@ -26,18 +27,31 @@ export class BlogComponent implements OnInit {
   formtitle = new FormControl('', [Validators.required]);
   formbody = new FormControl('', [Validators.required]);
 
+  newtitle: string;
+  newbody: string;
+
   edittitle: string;
   editbody: string;
+  editusername: string;
+  editCreatedAt;
+  editid: string;
 
   hasProfileImg: boolean;
   path;
 
   newPost: boolean = false;
+  blogs;
+  blogsAvailable: boolean;
+
+  loading: boolean = true;
+
+  currentDate;
 
   constructor(
     private dataSharingService: DataSharingService,
     private authService: AuthService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private toastr: ToastrService
   ) { 
     this.dataSharingService.isUserLoggedIn.subscribe( value => {
       this.isUserLoggedIn = value;
@@ -97,16 +111,23 @@ export class BlogComponent implements OnInit {
           this.dataSharingService.username.next(res.body.username);
           this.displayImg(res.body._id);
           this.findUsers(res.body._id);
+          this.GetBlogs();
+
+          this.currentDate = new Date();
+
+          this.loading = false;
       }, 
       (error: HttpErrorResponse) => {
         // console.log(error.error);
         this.authService.logout()
         this.dataSharingService.isUserLoggedIn.next(false);
         this.dataSharingService.username.next('');
+        this.loading = false;
       })
     } else{
       this.dataSharingService.isUserLoggedIn.next(false);
       this.dataSharingService.username.next('');
+      this.loading = false;
     }
   }
 
@@ -176,12 +197,101 @@ export class BlogComponent implements OnInit {
     }
   }
 
-  NewBlogOpen(){
-    this.newPost = true;
+  PostBlog(){
+    this.authService.PostBlog(this.newtitle, this.newbody, this.username).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        // this.value = true;
+        document.getElementById('openBlog').click();
+        this.GetBlogs();
+      } else{
+        this.toastr.error(res.body.message, 'Failure');
+        // this.value = false;
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+      // this.value = false;
+    })
   }
 
-  NewBlogClose(){
-    this.newPost = false;
+  UpdateBlog(){
+    this.authService.UpdateBlog(this.editid, this.edittitle, this.editbody, this.editusername).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        document.getElementById('editBlog').click();
+        this.GetBlogs();
+      } else{
+        this.toastr.error(res.body.message, 'Failure');
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+    })
   }
+
+  GetBlogs(){
+    this.authService.GetBlogs().subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.blogs = res.body.blogs;
+      } else{
+        this.toastr.error(res.body.message, 'Failure');
+      }
+      if(this.blogs.length === 0){
+        this.blogsAvailable = false;
+      } else{
+        this.blogsAvailable = true;
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+      // this.value = false;
+    })
+  }
+
+  EditBlog(id: string){
+    this.authService.EditBlog(id).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.edittitle = res.body.blog.title;
+        this.editbody = res.body.blog.body;
+        this.editusername = res.body.blog.createdBy;
+        this.editCreatedAt = res.body.blog.createdAt;
+        this.editid = res.body.blog._id;
+      } else{
+        this.toastr.error(res.body.message, 'Failure');
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+      // this.value = false;
+    })
+  }
+
+  DeleteClick(id: string){
+    this.authService.EditBlog(id).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.editid = res.body.blog._id;
+        this.edittitle = res.body.blog.title;
+        this.editbody = res.body.blog.body;
+        this.editusername = res.body.blog.createdBy;
+        this.editCreatedAt = res.body.blog.createdAt;
+      } else{
+        this.toastr.error(res.body.message, 'Failure');
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+      // this.value = false;
+    })
+  }
+
+  DeleteBlog(id: string){
+    this.authService.DeleteBlog(id).subscribe((res: HttpResponse<any>) => {      
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        this.GetBlogs();
+      } else{
+        console.log(res.body.message);
+      }      
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+      // this.value = false;
+    })
+  } 
 
 }

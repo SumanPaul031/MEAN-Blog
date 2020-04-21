@@ -1,45 +1,201 @@
 <h1 class="page-header">Blog Feed</h1>
-<button data-toggle="modal" [disabled]="newPost" class="button btn btn-warning" data-target="#newblogModal">New Post</button>
-<button class="button btn btn-info" style="margin-left: 1rem;"><i class="fa fa-refresh"></i></button>
+<button id="openBlog" data-toggle="modal" [disabled]="newPost" class="button btn btn-warning" data-target="#newblogModal">New Post</button>
+<button class="button btn btn-info" (click)="GetBlogs()" style="margin-left: 1rem;"><i class="fa fa-refresh"></i></button>
 
 <hr>
 <br>
 
-<div class="card" style="max-width: 700rem;">
-    <!-- <img class="card-img-top" src="img_avatar1.png" alt="Card image"> -->
-    <div class="card-header">
-        <h4 class="card-title">Title</h4>
-    </div>
-    <div class="card-body">
-        <p class="card-text">Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus perspiciatis blanditiis enim voluptatem eius, in natus culpa neque doloremque et doloribus laudantium aliquam minima est. Iste veniam doloribus ad, possimus quaerat quam dolores veritatis officiis repudiandae dolorem dolore facilis alias nam recusandae ea quia eum itaque quas nulla facere omnis.</p>
-    </div>
-    <div class="card-footer">
-        Posted By: <strong>Suman2031</strong><br>
-        Date: <strong>19th March, 2020</strong><br>
+<mat-spinner *ngIf="loading"></mat-spinner>
+<ng-template [ngIf]="!loading && blogs">
+  <!-- <div class="card" style="max-width: 700rem;" *ngFor="let blog of blogs"></div> -->
+  <div *ngFor="let blog of blogs">
+    <div class="card" style="max-width: 700rem; border: 2px solid white !important;">
+      <div class="card-header" style="text-align: center;">
+        <h4 class="card-title" style="font-weight: 900; text-transform: uppercase; color: aqua;">{{blog.title}}</h4>
+      </div>
 
-        <div>
+      <div class="card-body">
+        <p class="card-text">{{blog.body}}</p>
+      </div>
+
+      <div class="card-footer">
+        Posted By: <strong>{{blog.createdBy}}</strong><br>
+        Date: <strong>{{blog.createdAt | date: 'fullDate'}}</strong><br>
+
+        <div class="btn-group dropdown">
             <a class="dropdown-toggle" role="button" id="likes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fa fa-thumbs-up"></i>: <strong>25</strong>
+                <i class="fa fa-thumbs-up"></i>: <strong>{{blog.likes}}</strong>
             </a>
-            <div class="dropdown-menu" aria-labelledby="likes">
-                <a class="dropdown-item" href="#">Action</a>
-                <a class="dropdown-item" href="#">Another action</a>
-                <a class="dropdown-item" href="#">Something else here</a>
-            </div>
-            <!-- <i class="fa fa-thumbs-up"></i>: <strong>25</strong> -->
-            <i class="fa fa-thumbs-down" style="margin-left: 2rem;"></i>: <strong>25</strong>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="likes">
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+            </ul>
         </div>
-        <button class="button btn-success btn-sm" data-toggle="modal" data-target="#newblogModal"><i class="fa fa-edit"></i></button>
-        <button class="button btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal" style="margin-left: 0.4rem;"><i class="fa fa-trash"></i></button>
 
-        <div>
+        <div class="btn-group dropdown">
+          <a class="dropdown-toggle" role="button" id="dislikes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <i class="fa fa-thumbs-down" style="margin-left: 2rem;"></i>: <strong>{{blog.dislikes}}</strong>
+          </a>
+          <ul class="dropdown-menu" role="menu" aria-labelledby="dislikes">
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
+          </ul>
+        </div>
+        
+        <br>
+
+        <button id="editBlog" *ngIf="blog.createdBy === username" (click)="EditBlog(blog._id)" class="button btn-success btn-sm" data-toggle="modal" data-target="#editblogModal"><i class="fa fa-edit"></i></button>
+        <button *ngIf="blog.createdBy === username" (click)="DeleteClick(blog._id)" class="button btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal" style="margin-left: 0.4rem;"><i class="fa fa-trash"></i></button>
+
+        <div *ngIf="blog.createdBy !== username">
             <button class="button btn btn-info btn-sm"><i class="fa fa-thumbs-up"></i></button>
             <button class="button btn btn-danger btn-sm" style="margin-left: 0.7rem;"><i class="fa fa-thumbs-down"></i></button>
         </div>
-    </div>
-</div>
+      </div>
 
-<!-- Blog Modal -->
+      <div class="card-footer">
+        <label for="comment">Comment</label>
+        <textarea name="comment" class="form-control" id="comment" rows="2"></textarea>
+        <button class="btn btn-info btn-sm">Post Comment</button>
+        <button class="btn btn-warning btn-sm">Cancel</button>
+        <hr>
+        <div class="container">
+          <div class="row">
+            <div class="panel panel-default widget">
+              <div class="panel-heading">
+                <span class="glyphicon glyphicon-comment"></span>
+                <h3 class="panel-title">Recent Comments</h3>
+                <span class="label label-info">78</span>
+              </div>
+              <div class="panel-body" id="comments">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-xs-2 col-md-2 col-lg-2 col-xl-1">
+                                <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" />
+                            </div>
+                            <div class="col-xs-10 col-md-10 col-lg-10 col-xl-11">
+                                <div>
+                                    <a href="http://www.jquery2dotnet.com/2013/10/google-style-login-page-desing-usign.html">
+                                        Google Style Login Page Design Using Bootstrap</a>
+                                    <div class="mic-info">
+                                        By: <a href="#">Bhaumik Patel</a> on 2 Aug 2013
+                                    </div>
+                                </div>
+                                <div class="comment-text">
+                                    Awesome design
+                                </div>
+                                <div class="action">
+                                    <button type="button" class="btn btn-primary btn-sm" title="Edit">
+                                      <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-sm" title="Approved">
+                                      <i class="fa fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" title="Delete">
+                                      <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-xs-2 col-md-2 col-lg-2 col-xl-1">
+                              <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" />
+                            </div>
+                            <div class="col-xs-10 col-md-10 col-lg-10 col-xl-11">
+                                <div>
+                                    <a href="http://bootsnipp.com/BhaumikPatel/snippets/Obgj">Admin Panel Quick Shortcuts</a>
+                                    <div class="mic-info">
+                                        By: <a href="#">Bhaumik Patel</a> on 11 Nov 2013
+                                    </div>
+                                </div>
+                                <div class="comment-text">
+                                    Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                                    euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
+                                </div>
+                                <div class="action">
+                                    <button type="button" class="btn btn-primary btn-sm" title="Edit">
+                                      <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-sm" title="Approved">
+                                      <i class="fa fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" title="Delete">
+                                      <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="row">
+                            <div class="col-xs-2 col-md-2 col-lg-2 col-xl-1">
+                              <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" />
+                            </div>
+                            <div class="col-xs-10 col-md-10 col-lg-10 col-xl-11">
+                                <div>
+                                    <a href="http://bootsnipp.com/BhaumikPatel/snippets/4ldn">Cool Sign Up</a>
+                                    <div class="mic-info">
+                                        By: <a href="#">Bhaumik Patel</a> on 11 Nov 2013
+                                    </div>
+                                </div>
+                                <div class="comment-text">
+                                    Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
+                                    euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
+                                </div>
+                                <div class="action">
+                                    <button type="button" class="btn btn-primary btn-sm" title="Edit">
+                                      <i class="fa fa-edit"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-success btn-sm" title="Approved">
+                                      <i class="fa fa-check"></i>
+                                    </button>
+                                    <button type="button" class="btn btn-danger btn-sm" title="Delete">
+                                      <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+                <!-- <a href="#" class="btn btn-primary btn-sm btn-block" role="button"><span class="glyphicon glyphicon-refresh"></span> More</a> -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span>&nbsp;</span>
+    <span>&nbsp;</span>
+    <span>&nbsp;</span>
+  </div>
+
+<br>
+<br>
+</ng-template>
+
+<ng-template [ngIf]="!loading && !blogsAvailable">
+  <h4>No Blogs Avaialable</h4>
+</ng-template>
+
+
+<!-- New Blog Modal -->
 <div class="modal" id="newblogModal">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -47,7 +203,7 @@
         <!-- Modal Header -->
         <div class="modal-header">
           <h4 class="modal-title">New Blog</h4>
-          <button type="button" class="close" data-dismiss="modal" (click)="NewBlogClose()">&times;</button>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
   
         <!-- Modal body -->
@@ -55,26 +211,64 @@
             <form>
                 <div class="form-group">
                     <label for="title">Title</label>
-                    <input [formControl]="formtitle" type="text" name="title" class="form-control" [(ngModel)]="edittitle" id="title" placeholder="Enter Title..." required>
+                    <input [formControl]="formtitle" type="text" name="title" class="form-control" [(ngModel)]="newtitle" id="title" placeholder="Enter Title..." required>
                     <mat-error *ngIf="formtitle.invalid && formtitle.dirty">{{titleErrorMessage()}}</mat-error>
                     <br>
                     <label for="body">Body</label>
-                    <textarea [formControl]="formbody" name="body" class="form-control" [(ngModel)]="editbody" id="body" rows="5" required></textarea>
+                    <textarea [formControl]="formbody" name="body" class="form-control" [(ngModel)]="newbody" id="body" rows="5" required></textarea>
                     <mat-error *ngIf="formbody.invalid && formbody.dirty">{{bodyErrorMessage()}}</mat-error>
                 </div>
             </form>
-            <p>Posted By: <strong>Suman2031</strong></p>
-            <p>Date: <strong>19th March, 2020</strong></p>
+            <p>Posted By: <strong>{{username}}</strong></p>
+            <p>Date: <strong>{{currentDate | date: 'fullDate'}}</strong></p>
         </div>
   
         <!-- Modal footer -->
         <div class="modal-footer">
-          <button [disabled]="(formtitle.invalid) || (formbody.invalid)" type="button" class="btn btn-primary">Post</button>
-          <button type="button" class="btn btn-danger" data-dismiss="modal" (click)="NewBlogClose()">Close</button>
+          <button [disabled]="(formtitle.invalid) || (formbody.invalid)" type="button" class="btn btn-primary" (click)="PostBlog()">Post</button>
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
         </div>
   
       </div>
     </div>
+</div>
+
+<!-- Edit Blog Modal -->
+<div class="modal" id="editblogModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Edit Blog</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+          <form>
+              <div class="form-group">
+                  <label for="title">Title</label>
+                  <input [formControl]="formtitle" type="text" name="title" class="form-control" [(ngModel)]="edittitle" id="title" placeholder="Enter Title..." required>
+                  <mat-error *ngIf="formtitle.invalid && formtitle.dirty">{{titleErrorMessage()}}</mat-error>
+                  <br>
+                  <label for="body">Body</label>
+                  <textarea [formControl]="formbody" name="body" class="form-control" [(ngModel)]="editbody" id="body" rows="5" required></textarea>
+                  <mat-error *ngIf="formbody.invalid && formbody.dirty">{{bodyErrorMessage()}}</mat-error>
+              </div>
+          </form>
+          <p>Posted By: <strong>{{editusername}}</strong></p>
+          <p>Date: <strong>{{editCreatedAt | date: 'fullDate'}}</strong></p>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button [disabled]="(formtitle.invalid) || (formbody.invalid)" type="button" class="btn btn-primary" (click)="UpdateBlog()">Update</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <!-- Delete Modal -->
@@ -84,13 +278,13 @@
   
         <!-- Modal Header -->
         <div class="modal-header">
-          <h4 class="modal-title">Are You Sure You want to Delete "title"?</h4>
+          <h4 class="modal-title">Are You Sure You want to Delete {{edittitle}}?</h4>
           <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
         
         <!-- Modal footer -->
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-dismiss="modal">Yes</button>
+          <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="DeleteBlog(editid)">Yes</button>
           <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
         </div>
   

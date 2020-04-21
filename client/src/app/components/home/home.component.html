@@ -2,10 +2,13 @@
     <h1>MEAN Blog Application</h1>
     <p class="lead">Welcome to the MEAN Blog Application by <strong>Suman Paul</strong></p>
     <mat-spinner *ngIf="loading"></mat-spinner>
-    <div *ngIf="!isUserLoggedIn && !loading; then NotLoggedIn"></div>
-    <ng-template #NotLoggedIn>
+    <!-- <div *ngIf="!isUserLoggedIn && !loading; then NotLoggedIn else LoggedIn"></div> -->
+    <ng-template [ngIf]="!loading && !isUserLoggedIn">
       <a class="btn btn-primary" [routerLink]="['/register']" role="button" style="margin-right: 0.5rem;">Register</a>
       <a class="btn btn-dark" [routerLink]="['/login']" role="button">Login</a>
+    </ng-template>
+    <ng-template [ngIf]="!loading && isUserLoggedIn">
+      <a class="btn btn-info" [routerLink]="['/blog']" role="button">View Blogs</a>
     </ng-template>
     <!-- <div>
       <a [routerLink]="['/register']" class="btn btn-primary" style="margin-right: 0.5rem;">Register</a>

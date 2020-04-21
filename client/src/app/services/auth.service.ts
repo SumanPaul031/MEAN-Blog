@@ -239,6 +239,43 @@ export class AuthService {
     );
   }
 
+
+  /* For Blogs */
+  PostBlog(title: string, body: string, createdBy: string){
+    return this.http.post(`/blogs/newBlog`, { title, body, createdBy }, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  GetBlogs(){
+    return this.http.get(`/blogs/allBlogs`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  EditBlog(id: string){
+    return this.http.get(`/blogs/editBlog/${id}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  UpdateBlog(id: string, title: string, body: string, createdBy: string){
+    return this.http.put(`/blogs/editBlog/${id}`, { title, body, createdBy }, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  DeleteBlog(id: string){
+    return this.http.delete(`/blogs/editBlog/${id}`, { observe: 'response' }).pipe(
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
   logout(){
     this.removeSession();
     this.router.navigate(['/']);
