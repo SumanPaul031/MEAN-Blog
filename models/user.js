@@ -180,7 +180,7 @@ userSchema.methods.generateRefreshToken = function(){
 userSchema.methods.createSession = function(){
     let user = this;
 
-    console.log('User is: '+user);
+    // console.log('User is: '+user);
 
     return user.generateRefreshToken().then((refreshToken) => {
         return saveSessionToDatabase(user, refreshToken);

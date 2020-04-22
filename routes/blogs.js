@@ -185,5 +185,313 @@ module.exports = (router) => {
         });
     });
 
+    router.put('/likeBlog', (req, res) => {
+        if(!req.body.id){
+            res.json({ success: false, message: 'No id was provided' });
+        } else{
+            Blog.findOne({ _id: req.body.id }, (err, blog) => {
+                if(err){
+                    res.json({ success: false, message: err });
+                } else{
+                    if(!blog){
+                        res.json({ success: false, message: 'The blog was not found' });
+                    } else{
+                        User.findOne({ _id: req.decoded._id }, (err, user) => {
+                            if(err){
+                                res.json({ success: false, message: err });
+                            } else{
+                                if (!user) {
+                                    res.json({ success: false, message: 'Could not authenticate user.' });
+                                } else{
+                                    if (user.username === blog.createdBy) {
+                                        res.json({ success: false, messagse: 'Cannot like your own post.' });
+                                    } else{
+                                        if (blog.likedBy.includes(user.username)) {
+                                            res.json({ success: false, message: 'You already liked this post.' });
+                                        } else{
+                                            if(blog.dislikedBy.includes(user.username)){
+                                                blog.dislikes--;
+                                                const arrayIndex = blog.dislikedBy.indexOf(user.username);
+                                                blog.dislikedBy.splice(arrayIndex, 1);
+                                                blog.likes++;
+                                                blog.likedBy.push(user.username);
+                                                blog.save((err) => {
+                                                    if (err) {
+                                                      res.json({ success: false, message: err });
+                                                    } else {
+                                                      res.json({ success: true, message: 'Blog liked!' });
+                                                    }
+                                                });
+                                            } else{
+                                                blog.likes++;
+                                                blog.likedBy.push(user.username);
+                                                blog.save((err) => {
+                                                    if (err) {
+                                                      res.json({ success: false, message: err });
+                                                    } else {
+                                                      res.json({ success: true, message: 'Blog liked!' });
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                    }
+                }
+            })
+        }
+    });
+
+    router.put('/dislikeBlog', (req, res) => {
+        if(!req.body.id){
+            res.json({ success: false, message: 'No id was provided' });
+        } else{
+            Blog.findOne({ _id: req.body.id }, (err, blog) => {
+                if(err){
+                    res.json({ success: false, message: err });
+                } else{
+                    if(!blog){
+                        res.json({ success: false, message: 'The blog was not found' });
+                    } else{
+                        User.findOne({ _id: req.decoded._id }, (err, user) => {
+                            if(err){
+                                res.json({ success: false, message: err });
+                            } else{
+                                if (!user) {
+                                    res.json({ success: false, message: 'Could not authenticate user.' });
+                                } else{
+                                    if (user.username === blog.createdBy) {
+                                        res.json({ success: false, messagse: 'Cannot dislike your own post.' });
+                                    } else{
+                                        if (blog.dislikedBy.includes(user.username)) {
+                                            res.json({ success: false, message: 'You already disliked this post.' });
+                                        } else{
+                                            if(blog.likedBy.includes(user.username)){
+                                                blog.likes--;
+                                                const arrayIndex = blog.likedBy.indexOf(user.username);
+                                                blog.likedBy.splice(arrayIndex, 1);
+                                                blog.dislikes++;
+                                                blog.dislikedBy.push(user.username);
+                                                blog.save((err) => {
+                                                    if (err) {
+                                                      res.json({ success: false, message: err });
+                                                    } else {
+                                                      res.json({ success: true, message: 'Blog disliked!' });
+                                                    }
+                                                });
+                                            } else{
+                                                blog.dislikes++;
+                                                blog.dislikedBy.push(user.username);
+                                                blog.save((err) => {
+                                                    if (err) {
+                                                      res.json({ success: false, message: err });
+                                                    } else {
+                                                      res.json({ success: true, message: 'Blog disliked!' });
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        })
+                    }
+                }
+            })
+        }
+    });
+
+    router.post('/comment', (req, res) => {
+        if (!req.body.comment) {
+            res.json({ success: false, message: 'No comment provided' });
+        } else{
+            if (!req.body.id) {
+                res.json({ success: false, message: 'No id was provided' });
+            } else{
+                Blog.findOne({ _id: req.body.id }, (err, blog) => {
+                    if(err){
+                        res.json({ success: false, message: err });
+                    } else{
+                        if(!blog){
+                            res.json({ success: false, message: 'The blog was not found' });
+                        } else{
+                            User.findOne({ _id: req.decoded._id }, (err, user) => {
+                                if(err){
+                                    res.json({ success: false, message: err });
+                                } else{
+                                    if (!user) {
+                                        res.json({ success: false, message: 'Could not authenticate user.' });
+                                    } else{
+                                        if (user.username === blog.createdBy) {
+                                            res.json({ success: false, messagse: 'Cannot comment on your own post.' });
+                                        } else{
+                                            blog.comments.push({
+                                                comment: req.body.comment,
+                                                commentator: user.username,
+                                                commentedAt: Date.now()
+                                            });
+                                            
+                                            blog.save((err) => {
+                                                if (err) {
+                                                  res.json({ success: false, message: err });
+                                                } else {
+                                                  res.json({ success: true, message: 'Comment saved' });
+                                                }
+                                            })
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            }
+        }
+    });
+
+    router.get('/blog/:id/comment/:commentId', (req, res) => {
+        if (!req.params.id) {
+            res.json({ success: false, message: 'No id was provided' });
+        } else{
+            if(!req.params.commentId){
+                res.json({ success: false, message: 'No comment id was provided' });
+            } else{
+                Blog.findOne({ _id: req.params.id }, (err, blog) => {
+                    if(err){
+                        res.json({ success: false, message: err });
+                    } else{
+                        if(!blog){
+                            res.json({ success: false, message: 'The blog was not found' });
+                        } else{
+                            User.findOne({ _id: req.decoded._id }, (err, user) => {
+                                if(err){
+                                    res.json({ success: false, message: err });
+                                } else{
+                                    if (!user) {
+                                        res.json({ success: false, message: 'Could not authenticate user.' });
+                                    } else{
+                                        var index = blog.comments.findIndex(i => i._id == req.params.commentId);
+
+                                        console.log(blog.comments[index]);
+
+                                        if(blog.comments[index]){
+                                            if(user.username !== blog.comments[index].commentator){
+                                                res.json({ success: false, message: 'Cannot edit other\'s comments' });
+                                            } else{
+                                                res.json({ success: true, comment: blog.comments[index], blog: blog });
+                                            }
+                                        } else{
+                                            res.json({ success: false, message: 'Some Technical error' });
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            }
+        }
+    });
+
+    router.put('/comment', (req, res) => {
+        if (!req.body.comment) {
+            res.json({ success: false, message: 'No comment provided' });
+        } else{
+            if (!req.body.id) {
+                res.json({ success: false, message: 'No id was provided' });
+            } else{
+                Blog.findOne({ _id: req.body.id }, (err, blog) => {
+                    if(err){
+                        res.json({ success: false, message: err });
+                    } else{
+                        if(!blog){
+                            res.json({ success: false, message: 'The blog was not found' });
+                        } else{
+                            User.findOne({ _id: req.decoded._id }, (err, user) => {
+                                if(err){
+                                    res.json({ success: false, message: err });
+                                } else{
+                                    if (!user) {
+                                        res.json({ success: false, message: 'Could not authenticate user.' });
+                                    } else{
+                                        var index = blog.comments.findIndex(i => i._id == req.body.commentId);
+
+                                        if(user.username !== blog.comments[index].commentator){
+                                            res.json({ success: false, message: 'Cannot edit other\'s comments' });
+                                        } else{
+                                            // res.json({ success: true, comment: blog.comments[index], blog: blog });
+                                            blog.comments.splice(index, 1);
+                                            blog.comments.push({
+                                                comment: req.body.comment,
+                                                commentator: user.username,
+                                                commentedAt: Date.now()
+                                            });
+
+                                            blog.save((err) => {
+                                                if (err) {
+                                                    res.json({ success: false, message: err });
+                                                } else {
+                                                    res.json({ success: true, message: 'Comment edited' });
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            }
+        }
+    });
+
+    router.delete('/blog/:id/comment/:commentId', (req, res) => {
+        if (!req.params.id) {
+            res.json({ success: false, message: 'No id was provided' });
+        } else{
+            if(!req.params.commentId){
+                res.json({ success: false, message: 'No comment id was provided' });
+            } else{
+                Blog.findOne({ _id: req.params.id }, (err, blog) => {
+                    if(err){
+                        res.json({ success: false, message: err });
+                    } else{
+                        if(!blog){
+                            res.json({ success: false, message: 'The blog was not found' });
+                        } else{
+                            User.findOne({ _id: req.decoded._id }, (err, user) => {
+                                if(err){
+                                    res.json({ success: false, message: err });
+                                } else{
+                                    if (!user) {
+                                        res.json({ success: false, message: 'Could not authenticate user.' });
+                                    } else{
+                                        var index = blog.comments.findIndex(i => i._id == req.params.commentId);
+
+                                        if(user.username !== blog.comments[index].commentator){
+                                            res.json({ success: false, message: 'Cannot delete other\'s comments' });
+                                        } else{
+                                            blog.comments.splice(index, 1);
+
+                                            blog.save((err) => {
+                                                if (err) {
+                                                    res.json({ success: false, message: err });
+                                                } else {
+                                                    res.json({ success: true, message: 'Comment deleted' });
+                                                }
+                                            });
+                                        }
+                                    }
+                                }
+                            })
+                        }
+                    }
+                })
+            }
+        }
+    });
+
     return router;
 }

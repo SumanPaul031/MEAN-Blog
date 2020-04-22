@@ -74,12 +74,14 @@ export class AuthInterceptorsService implements HttpInterceptor {
   addAuthHeader(req: HttpRequest<any>){
     //get the access token
     const token = this.authService.getAccessToken();
+    const id = this.authService.getUserId();
 
     if(token){
       //append the access token to the request header
       return req.clone({
         setHeaders: {
-          'x-access-token': token
+          'x-access-token': token,
+          '_id': id
         }
       })
     }

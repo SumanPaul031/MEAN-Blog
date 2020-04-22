@@ -12,6 +12,7 @@ import { FilePondModule, registerPlugin } from 'ngx-filepond';
 import { NgxTypeaheadModule } from 'ngx-typeahead';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatInputModule } from '@angular/material/input';
+import { OrderModule } from 'ngx-order-pipe';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -81,7 +82,8 @@ registerPlugin(FilePondPluginImageResize);
     FilePondModule,
     NgxTypeaheadModule,
     MatAutocompleteModule,
-    MatInputModule
+    MatInputModule,
+    OrderModule
   ],
   providers: [
     AuthService,

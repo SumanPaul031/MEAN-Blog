@@ -26,34 +26,48 @@
             <a class="dropdown-toggle" role="button" id="likes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                 <i class="fa fa-thumbs-up"></i>: <strong>{{blog.likes}}</strong>
             </a>
-            <ul class="dropdown-menu" role="menu" aria-labelledby="likes">
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-              <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-            </ul>
+            
+            <ng-template [ngIf]="blog.likedBy.length === 1 && !blog.likedBy.includes(username)">
+              <ul class="dropdown-menu" role="menu" aria-labelledby="likes">              
+                <li role="presentation">
+                  <a role="menuitem" tabindex="-1" [routerLink]="['/profiledisplay', blog.likedBy[0]]">{{blog.likedBy[0]}}</a>
+                </li>
+              </ul>
+            </ng-template>
+  
+            <ng-template [ngIf]="blog.likedBy.length > 1">
+              <ul class="dropdown-menu" role="menu" aria-labelledby="likes">              
+                <li role="presentation" *ngFor="let person of blog.likedBy">
+                  <ng-template [ngIf]="person !== username">
+                    <a role="menuitem" tabindex="-1" [routerLink]="['/profiledisplay', person]">{{person}}</a>
+                  </ng-template>
+                </li>
+              </ul>
+            </ng-template>
         </div>
 
         <div class="btn-group dropdown">
           <a class="dropdown-toggle" role="button" id="dislikes" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
             <i class="fa fa-thumbs-down" style="margin-left: 2rem;"></i>: <strong>{{blog.dislikes}}</strong>
           </a>
-          <ul class="dropdown-menu" role="menu" aria-labelledby="dislikes">
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Action</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Another action</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Something else here</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-            <li role="presentation"><a role="menuitem" tabindex="-1" href="#">Separated link</a></li>
-          </ul>
+
+          <ng-template [ngIf]="blog.dislikedBy.length === 1 && !blog.dislikedBy.includes(username)">
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dislikes">              
+              <li role="presentation">
+                <a role="menuitem" tabindex="-1" [routerLink]="['/profiledisplay', blog.dislikedBy[0]]">{{blog.dislikedBy[0]}}</a>
+              </li>
+            </ul>
+          </ng-template>
+
+          <ng-template [ngIf]="blog.dislikedBy.length > 1">
+            <ul class="dropdown-menu" role="menu" aria-labelledby="dislikes">              
+              <li role="presentation" *ngFor="let person of blog.dislikedBy">
+                <ng-template [ngIf]="person !== username">
+                  <a role="menuitem" tabindex="-1" [routerLink]="['/profiledisplay', person]">{{person}}</a>
+                </ng-template>
+              </li>
+            </ul>
+          </ng-template>
         </div>
         
         <br>
@@ -62,120 +76,55 @@
         <button *ngIf="blog.createdBy === username" (click)="DeleteClick(blog._id)" class="button btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal" style="margin-left: 0.4rem;"><i class="fa fa-trash"></i></button>
 
         <div *ngIf="blog.createdBy !== username">
-            <button class="button btn btn-info btn-sm"><i class="fa fa-thumbs-up"></i></button>
-            <button class="button btn btn-danger btn-sm" style="margin-left: 0.7rem;"><i class="fa fa-thumbs-down"></i></button>
+            <button [disabled]="blog.likedBy.includes(username)" class="button btn btn-info btn-sm" (click)="LikeBlog(blog._id)"><i class="fa fa-thumbs-up"></i></button>
+            <button [disabled]="blog.dislikedBy.includes(username)" class="button btn btn-danger btn-sm" (click)="DislikeBlog(blog._id)" style="margin-left: 0.7rem;"><i class="fa fa-thumbs-down"></i></button>
         </div>
       </div>
 
       <div class="card-footer">
-        <label for="comment">Comment</label>
-        <textarea name="comment" class="form-control" id="comment" rows="2"></textarea>
-        <button class="btn btn-info btn-sm">Post Comment</button>
-        <button class="btn btn-warning btn-sm">Cancel</button>
-        <hr>
+        <ng-template [ngIf]="blog.createdBy !== username">
+          <label for="comment">Comment</label>
+          <textarea [formControl]="formcomment" [(ngModel)]="newcomment" name="comment" class="form-control" id="comment" rows="2"></textarea>
+          <div style="margin-top: 1rem;">
+            <button *ngIf="formcomment.valid" class="btn btn-info btn-sm" (click)="PostComment(blog._id, newcomment)">Post Comment</button>
+            <button *ngIf="formcomment.valid && formcomment.dirty" (click)="clearComment()" class="btn btn-warning btn-sm" style="margin-left: 0.7rem;">Cancel</button>
+          </div>
+          <hr>
+        </ng-template>
         <div class="container">
-          <div class="row">
-            <div class="panel panel-default widget">
-              <div class="panel-heading">
-                <span class="glyphicon glyphicon-comment"></span>
-                <h3 class="panel-title">Recent Comments</h3>
-                <span class="label label-info">78</span>
-              </div>
-              <div class="panel-body" id="comments">
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <div class="row">
-                            <div class="col-xs-2 col-md-2 col-lg-2 col-xl-1">
-                                <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" />
-                            </div>
-                            <div class="col-xs-10 col-md-10 col-lg-10 col-xl-11">
+          <div class="card" style="max-width: 690rem; border: 2px solid lightcoral !important;">
+            <div class="card-header">
+              <h5 class="card-title" style="font-weight: 700; color: lightgreen">Comments: <strong>{{blog.comments.length}}</strong></h5>
+              <!-- <span class="glyphicon glyphicon-comment"></span> -->
+            </div>
+            <div *ngIf="blog.comments.length > 0" class="card-body" id="comments">
+              <ul class="list-group">
+                <li class="list-group-item" *ngFor="let comment of blog.comments | orderBy: blog.comments.commentedAt : true">
+                    <div class="row">
+                        <div class="col-xs-2 col-md-2">
+                            <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" />
+                        </div>
+                        <div class="col-xs-10 col-md-10">
+                            <div>
                                 <div>
-                                    <a href="http://www.jquery2dotnet.com/2013/10/google-style-login-page-desing-usign.html">
-                                        Google Style Login Page Design Using Bootstrap</a>
-                                    <div class="mic-info">
-                                        By: <a href="#">Bhaumik Patel</a> on 2 Aug 2013
-                                    </div>
+                                    By: <a [routerLink]="['/profiledisplay', comment.commentator]">{{comment.commentator}}</a> on {{comment.commentedAt | date: 'fullDate'}}
                                 </div>
-                                <div class="comment-text">
-                                    Awesome design
-                                </div>
-                                <div class="action">
-                                    <button type="button" class="btn btn-primary btn-sm" title="Edit">
-                                      <i class="fa fa-edit"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-success btn-sm" title="Approved">
-                                      <i class="fa fa-check"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" title="Delete">
-                                      <i class="fa fa-trash"></i>
-                                    </button>
-                                </div>
+                            </div>
+                            <div>
+                                {{comment.comment}}
+                            </div>
+                            <div *ngIf="comment.commentator === username" style="margin-top: 0.4rem;">
+                                <button id="editComment" type="button" class="btn btn-success btn-sm" (click)="GetEditComment(blog._id, comment._id)" data-toggle="modal" data-target="#editcommentModal">
+                                  <i class="fa fa-edit"></i>
+                                </button>
+                                <button type="button" class="btn btn-danger btn-sm" (click)="GetEditComment(blog._id, comment._id)" data-toggle="modal" data-target="#deletecommentModal" style="margin-left: 0.4rem;">
+                                  <i class="fa fa-trash"></i>
+                                </button>
                             </div>
                         </div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="row">
-                            <div class="col-xs-2 col-md-2 col-lg-2 col-xl-1">
-                              <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" />
-                            </div>
-                            <div class="col-xs-10 col-md-10 col-lg-10 col-xl-11">
-                                <div>
-                                    <a href="http://bootsnipp.com/BhaumikPatel/snippets/Obgj">Admin Panel Quick Shortcuts</a>
-                                    <div class="mic-info">
-                                        By: <a href="#">Bhaumik Patel</a> on 11 Nov 2013
-                                    </div>
-                                </div>
-                                <div class="comment-text">
-                                    Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
-                                    euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
-                                </div>
-                                <div class="action">
-                                    <button type="button" class="btn btn-primary btn-sm" title="Edit">
-                                      <i class="fa fa-edit"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-success btn-sm" title="Approved">
-                                      <i class="fa fa-check"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" title="Delete">
-                                      <i class="fa fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="list-group-item">
-                        <div class="row">
-                            <div class="col-xs-2 col-md-2 col-lg-2 col-xl-1">
-                              <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" />
-                            </div>
-                            <div class="col-xs-10 col-md-10 col-lg-10 col-xl-11">
-                                <div>
-                                    <a href="http://bootsnipp.com/BhaumikPatel/snippets/4ldn">Cool Sign Up</a>
-                                    <div class="mic-info">
-                                        By: <a href="#">Bhaumik Patel</a> on 11 Nov 2013
-                                    </div>
-                                </div>
-                                <div class="comment-text">
-                                    Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh
-                                    euismod tincidunt ut laoreet dolore magna aliquam erat volutpat. Ut wisi enim
-                                </div>
-                                <div class="action">
-                                    <button type="button" class="btn btn-primary btn-sm" title="Edit">
-                                      <i class="fa fa-edit"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-success btn-sm" title="Approved">
-                                      <i class="fa fa-check"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-danger btn-sm" title="Delete">
-                                      <i class="fa fa-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                </ul>
-                <!-- <a href="#" class="btn btn-primary btn-sm btn-block" role="button"><span class="glyphicon glyphicon-refresh"></span> More</a> -->
-              </div>
+                    </div>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
@@ -271,7 +220,7 @@
   </div>
 </div>
 
-<!-- Delete Modal -->
+<!-- Delete Blog -->
 <div class="modal" id="deleteModal">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -290,4 +239,60 @@
   
       </div>
     </div>
+</div>
+
+<!-- Edit Comment Modal -->
+<div class="modal" id="editcommentModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Edit Comment</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+
+      <!-- Modal body -->
+      <div class="modal-body">
+          <form>
+              <div class="form-group">
+                  <label for="title">Title</label>
+                  <textarea [formControl]="editformcomment" [(ngModel)]="editcomment" name="comment" class="form-control"  id="comment" rows="2"></textarea>
+                  <!-- <textarea [formControl]="formcomment" [(ngModel)]="newcomment" name="comment" class="form-control" id="comment" rows="2"></textarea> -->
+                  <mat-error *ngIf="editformcomment.invalid && editformcomment.dirty">{{commentErrorMessage()}}</mat-error>
+              </div>
+          </form>
+          <p>Commented By: <strong>{{editcommentator}}</strong></p>
+          <p>Date: <strong>{{editCommentedAt | date: 'fullDate'}}</strong></p>
+      </div>
+
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button [disabled]="(editformcomment.invalid)" type="button" class="btn btn-primary" (click)="EditComment(editid, editcomment, editcommentId)">Update</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Delete Comment -->
+<div class="modal" id="deletecommentModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <!-- Modal Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Are You Sure You want to Delete your comment?</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
+      
+      <!-- Modal footer -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" (click)="DeleteComment(editid, editcommentId)">Yes</button>
+        <button type="button" class="btn btn-danger" data-dismiss="modal">No</button>
+      </div>
+
+    </div>
+  </div>
 </div>

@@ -5,6 +5,7 @@ import { HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { DomSanitizer } from '@angular/platform-browser';
 import { FormGroup, FormBuilder, FormControl, FormGroupDirective, NgForm, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
+import { OrderPipe } from 'ngx-order-pipe';
 
 @Component({
   selector: 'app-blog',
@@ -26,9 +27,17 @@ export class BlogComponent implements OnInit {
 
   formtitle = new FormControl('', [Validators.required]);
   formbody = new FormControl('', [Validators.required]);
+  formcomment = new FormControl('', [Validators.required]);
+  editformcomment = new FormControl('', [Validators.required]);
 
   newtitle: string;
   newbody: string;
+
+  newcomment: string;
+  editcomment: string;
+  editcommentId: string;
+  editCommentedAt;
+  editcommentator;
 
   edittitle: string;
   editbody: string;
@@ -51,7 +60,8 @@ export class BlogComponent implements OnInit {
     private dataSharingService: DataSharingService,
     private authService: AuthService,
     private sanitizer: DomSanitizer,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private orderPipe: OrderPipe
   ) { 
     this.dataSharingService.isUserLoggedIn.subscribe( value => {
       this.isUserLoggedIn = value;
@@ -197,20 +207,25 @@ export class BlogComponent implements OnInit {
     }
   }
 
+  commentErrorMessage(){
+    if (this.editformcomment.hasError('required')) {
+      return 'You must enter a body';
+    } else {
+      return '';
+    }
+  }
+
   PostBlog(){
     this.authService.PostBlog(this.newtitle, this.newbody, this.username).subscribe((res: HttpResponse<any>) => {
       if(res.body.success){
         this.toastr.success(res.body.message, 'Success');
-        // this.value = true;
         document.getElementById('openBlog').click();
         this.GetBlogs();
       } else{
         this.toastr.error(res.body.message, 'Failure');
-        // this.value = false;
       }
     }, (err: HttpErrorResponse) => {
       console.log(err.error);
-      // this.value = false;
     })
   }
 
@@ -232,6 +247,7 @@ export class BlogComponent implements OnInit {
     this.authService.GetBlogs().subscribe((res: HttpResponse<any>) => {
       if(res.body.success){
         this.blogs = res.body.blogs;
+        this.orderPipe.transform(this.blogs);
       } else{
         this.toastr.error(res.body.message, 'Failure');
       }
@@ -242,7 +258,6 @@ export class BlogComponent implements OnInit {
       }
     }, (err: HttpErrorResponse) => {
       console.log(err.error);
-      // this.value = false;
     })
   }
 
@@ -259,7 +274,6 @@ export class BlogComponent implements OnInit {
       }
     }, (err: HttpErrorResponse) => {
       console.log(err.error);
-      // this.value = false;
     })
   }
 
@@ -276,7 +290,6 @@ export class BlogComponent implements OnInit {
       }
     }, (err: HttpErrorResponse) => {
       console.log(err.error);
-      // this.value = false;
     })
   }
 
@@ -290,8 +303,100 @@ export class BlogComponent implements OnInit {
       }      
     }, (err: HttpErrorResponse) => {
       console.log(err.error);
-      // this.value = false;
     })
   } 
+
+  LikeBlog(id: string){
+    this.authService.LikeBlog(id).subscribe((res: HttpResponse<any>) => {      
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        this.GetBlogs();
+      } else{
+        console.log(res.body.message);
+      }      
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+    })
+  }
+
+  DislikeBlog(id: string){
+    this.authService.DislikeBlog(id).subscribe((res: HttpResponse<any>) => {      
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        this.GetBlogs();
+      } else{
+        console.log(res.body.message);
+      }      
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+    })
+  }
+
+  PostComment(id: string, comment: string){
+    this.authService.PostComment(id, comment).subscribe((res: HttpResponse<any>) => {      
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        this.newcomment = '';
+        this.GetBlogs();
+      } else{
+        console.log(res.body.message);
+      }      
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+    })
+
+    // console.log(comment);
+  }
+
+  clearComment(){
+    (<HTMLTextAreaElement>document.getElementById('comment')).value = '';
+    this.newcomment = '';
+  }
+
+  GetEditComment(id: string, commentId: string){
+    this.authService.GetEditComment(id, commentId).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.editid = res.body.blog._id;
+        this.editcomment = res.body.comment.comment;
+        this.editcommentId = res.body.comment._id;
+        this.editCommentedAt = res.body.comment.commentedAt;
+        this.editcommentator = res.body.comment.commentator;
+      } else{
+        console.log(res.body.message);
+        this.toastr.error(res.body.message, 'Failure');
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+    })
+  }
+
+  EditComment(id: string, comment: string, commentId: string){
+    this.authService.EditComment(id, comment, commentId).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        document.getElementById('editComment').click();
+        this.GetBlogs();
+      } else{
+        console.log(res.body.message);
+        this.toastr.error(res.body.message, 'Failure');
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+    })
+  }
+
+  DeleteComment(id: string, commentId: string){
+    this.authService.DeleteComment(id, commentId).subscribe((res: HttpResponse<any>) => {
+      if(res.body.success){
+        this.toastr.success(res.body.message, 'Success');
+        this.GetBlogs();
+      } else{
+        console.log(res.body.message);
+        this.toastr.error(res.body.message, 'Failure');
+      }
+    }, (err: HttpErrorResponse) => {
+      console.log(err.error);
+    })
+  }
 
 }

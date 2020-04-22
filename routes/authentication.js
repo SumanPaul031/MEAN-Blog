@@ -24,7 +24,7 @@ module.exports = (router) => {
         User.findByIdAndToken(_id, refreshToken).then((user) => {
             if(!user){
                 //user couldn't be found
-                res.status(401).json({
+                return res.status(401).json({
                     success: false,
                     message: 'Make sure the refresh token and userID are valid'
                 })
@@ -52,13 +52,14 @@ module.exports = (router) => {
                 next();
             } else{
                 //session is not valid
-                res.status(401).json({
+                return res.status(401).json({
                     success: false,
                     message: 'Refresh token has expired or the session is invalid'
                 });
             }
         }).catch((e) => {
-            res.status(401).json({
+            console.log(e);
+            return res.json({
                 success: false,
                 message: e
             });
@@ -67,13 +68,13 @@ module.exports = (router) => {
 
     router.post('/register', (req, res) => {
         if(!req.body.email){
-            res.json({ success: false, message: 'Please Provide an Email' });
+            return res.json({ success: false, message: 'Please Provide an Email' });
         } else{
             if(!req.body.username){
-                res.json({ success: false, message: 'Please Provide a Username' });
+                return res.json({ success: false, message: 'Please Provide a Username' });
             } else {
                 if(!req.body.password){
-                    res.json({ success: false, message: 'Please Provide a Password' });
+                    return res.json({ success: false, message: 'Please Provide a Password' });
                 } else {
                     let user = new User({
                         email: req.body.email.toLowerCase(),
@@ -105,7 +106,7 @@ module.exports = (router) => {
                             return {accessToken, refreshToken};
                         });
                     }).then((authTokens) => {
-                        res.json({
+                        return res.json({
                             success: true,
                             message: 'You have been successfully registered. Please check your email for activation Link',
                             headers: {
@@ -118,22 +119,22 @@ module.exports = (router) => {
                         if(err.name === 'MongoError'){
                             if(err.code === 11000){
                                 if(err.keyPattern.email){
-                                    res.json({ success: false, message: 'Email already exists' });
+                                    return res.json({ success: false, message: 'Email already exists' });
                                 } else if(err.keyPattern.username){
-                                    res.json({ success: false, message: 'Username already exists' });
+                                    return res.json({ success: false, message: 'Username already exists' });
                                 }
                             }
                         } else if(err.name === 'ValidationError'){
                             // console.log(err.errors.email.message);
                             if(err.errors.email){
-                                res.json({ success: false, message: err.errors.email.message });
+                                return res.json({ success: false, message: err.errors.email.message });
                             } else if(err.errors.username){
-                                res.json({ success: false, message: err.errors.username.message });
+                                return res.json({ success: false, message: err.errors.username.message });
                             } else if(err.errors.password){
-                                res.json({ success: false, message: err.errors.password.message });
+                                return res.json({ success: false, message: err.errors.password.message });
                             }
                         } else{
-                            res.json({ success: false, message: 'Could Not Save User. Error: '+err });
+                            return res.json({ success: false, message: 'Could Not Save User. Error: '+err });
                         }
                     })
                 }
@@ -143,16 +144,16 @@ module.exports = (router) => {
 
     router.get('/checkEmail/:email', (req, res) => {
         if(!req.params.email){
-            res.json({ success: false, message: 'Email was not provided'});
+            return res.json({ success: false, message: 'Email was not provided'});
         } else{
             User.findOne({ email: req.params.email }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     if(user){
-                        res.json({ success: false, message: 'Email already exists' });
+                        return res.json({ success: false, message: 'Email already exists' });
                     } else{
-                        res.json({ success: true });
+                        return res.json({ success: true });
                     }
                 }
             })
@@ -161,16 +162,16 @@ module.exports = (router) => {
 
     router.get('/checkUsername/:username', (req, res) => {
         if(!req.params.username){
-            res.json({ success: false, message: 'Username was not provided'});
+            return res.json({ success: false, message: 'Username was not provided'});
         } else{
             User.findOne({ username: req.params.username }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     if(user){
-                        res.json({ success: false, message: 'Username already taken' });
+                        return res.json({ success: false, message: 'Username already taken' });
                     } else{
-                        res.json({ success: true });
+                        return res.json({ success: true });
                     }
                 }
             })
@@ -180,24 +181,24 @@ module.exports = (router) => {
 
     router.post('/login', (req, res) => {
         if(!req.body.username){
-            res.json({ success: false, message: 'Please provide a username' });
+            return res.json({ success: false, message: 'Please provide a username' });
         } else{
             if(!req.body.password){
-                res.json({ success: false, message: 'Please enter a password' });
+                return res.json({ success: false, message: 'Please enter a password' });
             } else{
                 User.findOne({ username: req.body.username.toLowerCase() }, (err, user) => {
                     if(err){
-                        res.json({ success: false, message: err });
+                        return res.json({ success: false, message: err });
                     } else{
                         if(!user){
-                            res.json({ success: false, message: 'Username Not Found' });
+                            return res.json({ success: false, message: 'Username Not Found' });
                         } else{
                             const validPassword = user.comparePassword(req.body.password);
                             if(!validPassword){
-                                res.json({ success: false, message: 'Incorrect Password' });
+                                return res.json({ success: false, message: 'Incorrect Password' });
                             } else{
                                 if(!user.active){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: 'Account is not yet activated. Please check your email for activation link',
                                         expired: true
@@ -208,7 +209,7 @@ module.exports = (router) => {
                                             return {accessToken, refreshToken}
                                         });
                                     }).then((authTokens) => {
-                                        res.json({
+                                        return res.json({
                                             success: true,
                                             message: 'Logged In Successfully!',
                                             headers: {
@@ -236,7 +237,7 @@ module.exports = (router) => {
     router.get('/access-token', verifySession, (req, res) => {
         //We know that the caller is authenticated and we have the user_id and userObject available to us
         req.userObject.generateAccessToken().then((accessToken) => {
-            res.json({
+            return res.json({
                 success: true,
                 message: 'new access token generated',
                 headers: {
@@ -245,7 +246,7 @@ module.exports = (router) => {
                 token: accessToken
             });
         }).catch((e) => {
-            res.status(401).json({
+            return res.status(401).json({
                 success: false,
                 message: e
             });
@@ -254,20 +255,20 @@ module.exports = (router) => {
 
     router.get('/activate/:token', (req, res) => {
         if(req.params.token === null || req.params.token === undefined || req.params.token === ''){
-            res.json({ success: false, message: 'No activation token Found' });
+            return res.json({ success: false, message: 'No activation token Found' });
         } else{
             User.findOne({ temporarytoken: req.params.token }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     jwt.verify(req.params.token, config.secret, function(err, decoded) {
                         if(err){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Activation Link has expired'
                             });
                         } else if(!user) {
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Activation Link has expired'
                             });
@@ -291,7 +292,7 @@ module.exports = (router) => {
                                     }
                                 });
                 
-                                res.json({
+                                return res.json({
                                     success: true,
                                     message: 'Account Activated'
                                 });
@@ -312,21 +313,21 @@ module.exports = (router) => {
         } else{
             User.findOne({ email: req.body.email }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     if(!user){
-                        res.json({
+                        return res.json({
                             success: false,
                             message: 'Email not found'
                         });
                     } else{
                         if(user.active){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Account already activated'
                             })
                         } else{
-                            res.json({ success: true, user: user });
+                            return res.json({ success: true, user: user });
                         } 
                     }
                 }
@@ -343,10 +344,10 @@ module.exports = (router) => {
         } else{
             User.findOne({ email: req.body.email }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     if(!user){
-                        res.json({
+                        return res.json({
                             success: false,
                             message: 'Email not found'
                         });
@@ -370,12 +371,12 @@ module.exports = (router) => {
                                 }
                             });
             
-                            res.json({
+                            return res.json({
                                 success: true,
                                 message: 'Activation Link Sent. Please check your mail for new activation link'
                             });
                         }).catch((e) => {
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: e
                             })
@@ -388,23 +389,23 @@ module.exports = (router) => {
 
     router.get('/resetusername/:email', (req, res) => {
         if(req.params.email === undefined || req.params.email === null || req.params.email === ''){
-            res.json({
+            return res.json({
                 success: false,
                 message: 'No Email Found'
             });
         } else{
             User.findOne({ email: req.params.email }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     if(!user){
-                        res.json({
+                        return res.json({
                             success: false,
                             message: 'Email Not Found'
                         });
                     } else{
                         if(!user.active){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Account is not yet activated. Please check your email for activation link',
                                 expired: true
@@ -426,7 +427,7 @@ module.exports = (router) => {
                                 }
                             });
         
-                            res.json({
+                            return res.json({
                                 success: true,
                                 message: 'Username has been sent to your email'
                             });
@@ -439,23 +440,23 @@ module.exports = (router) => {
 
     router.put('/resetpassword', (req, res) => {
         if(req.body.email === undefined || req.body.email === null || req.body.email === ''){
-            res.json({
+            return res.json({
                 success: false,
                 message: 'Please enter your email'
             });
         } else{
             User.findOne({ email: req.body.email }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     if(!user){
-                        res.json({
+                        return res.json({
                             success: false,
                             message: 'Email Not Found'
                         })
                     } else{
                         if(!user.active){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Account is not yet activated. Please check your email for activation link',
                                 expired: true
@@ -480,12 +481,12 @@ module.exports = (router) => {
                                     }
                                 });
                 
-                                res.json({
+                                return res.json({
                                     success: true,
                                     message: 'Password Reset Link Sent. Please check your mail'
                                 });
                             }).catch((e) => {
-                                res.json({
+                                return res.json({
                                     success: false,
                                     message: e
                                 })
@@ -499,26 +500,26 @@ module.exports = (router) => {
 
     router.get('/newpassword/:token', (req, res) => {
         if(req.params.token === null || req.params.token === undefined || req.params.token === ''){
-            res.json({ success: false, message: 'No Password Reset Token Found'});
+            return res.json({ success: false, message: 'No Password Reset Token Found'});
         } else{
             User.findOne({ resettoken: req.params.token }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     jwt.verify(req.params.token, config.secret, function(err, decoded) {
                         if(err){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Invalid Token'
                             });
                         } else{
                             if(!user) {
-                                res.json({
+                                return res.json({
                                     success: false,
                                     message: 'Reset Link has expired'
                                 });
                             } else{
-                                res.json({
+                                return res.json({
                                     success: true,
                                     user: user
                                 });
@@ -532,17 +533,17 @@ module.exports = (router) => {
 
     router.put('/savepassword', (req, res) => {
         if(req.body.email === undefined || req.body.email === null || req.body.email === ''){
-            res.json({
+            return res.json({
                 success: false,
                 message: 'Please enter your email'
             });
         } else{
             User.findOne({ email: req.body.email }, (err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     if(req.body.password === null || req.body.password === undefined || req.body.password === ''){
-                        res.json({
+                        return res.json({
                             success: false,
                             message: 'Please enter a new password'
                         });
@@ -567,14 +568,14 @@ module.exports = (router) => {
                                 }
                             });
 
-                            res.json({
+                            return res.json({
                                 success: true,
                                 message: 'Password Reset successfully'
                             });
                         }).catch((e) => {
                             if(e.name === "ValidationError"){
                                 if(e.errors.password){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: e.errors.password.message
                                     });
@@ -594,6 +595,7 @@ module.exports = (router) => {
             //verify token
             jwt.verify(token, config.secret, function(err, decoded) {
                 if(err){
+                    // console.log(err);
                     return res.status(401).json({
                         success: false,
                         message: 'Invalid Token'
@@ -619,24 +621,24 @@ module.exports = (router) => {
         User.find({}, (err, users) => {
             if(err){
                 console.log('Unknown Error')
-                res.json({ success: false, message: err });
+                return res.json({ success: false, message: err });
             } else{
                 User.findOne({ email: req.decoded.email }, (err, mainUser) => {
                     if(err){
                         console.log('Error while finding main user')
-                        res.json({ success: false, message: err });
+                        return res.json({ success: false, message: err });
                     } else{
                         if(!mainUser){
                             console.log('Main User Not Found');
-                            res.json({ success: false, message: 'Main User Not Found' });
+                            return res.json({ success: false, message: 'Main User Not Found' });
                         } else{
                             if(!users){
-                                res.json({
+                                return res.json({
                                     success: false,
                                     message: 'No users Found'
                                 })
                             } else{
-                                res.json({
+                                return res.json({
                                     success: true,
                                     users: users
                                 })
@@ -650,28 +652,28 @@ module.exports = (router) => {
 
     router.get('/displayUsers/:username', (req, res) => {
         if(!req.params.username){
-            res.json({ success: false });
+            return res.json({ success: false });
         } else{
             User.find({ "username": new RegExp(req.params.username, 'i') }).exec((err, users) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     User.findOne({ email: req.decoded.email }, (err, mainUser) => {
                         if(err){
                             console.log('Error while finding main user')
-                            res.json({ success: false, message: err });
+                            return res.json({ success: false, message: err });
                         } else{
                             if(!mainUser){
                                 console.log('Main User Not Found');
-                                res.json({ success: false, message: 'Main User Not Found' });
+                                return res.json({ success: false, message: 'Main User Not Found' });
                             } else{
                                 if(!users){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: 'No users Found'
                                     })
                                 } else{
-                                    res.json({
+                                    return res.json({
                                         success: true,
                                         users: users
                                     })
@@ -686,39 +688,39 @@ module.exports = (router) => {
 
     router.get('/profiledisplay/:username', (req, res) => {
         if(!req.params.username){
-            res.json({ success: false });
+            return res.json({ success: false });
         } else{
             User.findOne({ username: req.params.username }).exec((err, user) => {
                 if(err){
-                    res.json({ success: false, message: err });
+                    return res.json({ success: false, message: err });
                 } else{
                     User.findOne({ email: req.decoded.email }, (err, mainUser) => {
                         if(err){
                             console.log('Error while finding main user')
-                            res.json({ success: false, message: err });
+                            return res.json({ success: false, message: err });
                         } else{
                             if(!mainUser){
                                 console.log('Main User Not Found');
-                                res.json({ success: false, message: 'Main User Not Found' });
+                                return res.json({ success: false, message: 'Main User Not Found' });
                             } else{
                                 if(!user){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: 'No user Found'
                                     })
                                 } else{
                                     if(mainUser.permission === 'user' && (user.permission === 'moderator' || user.permission === 'admin')){
-                                        res.json({
+                                        return res.json({
                                             success: false,
                                             message: 'You do not have the permission to view this user'
                                         })
                                     } else if(mainUser.permission === 'moderator' && (user.permission === 'admin')){
-                                        res.json({
+                                        return res.json({
                                             success: false,
                                             message: 'You do not have the permission to view this user'
                                         })
                                     } else{
-                                        res.json({
+                                        return res.json({
                                             success: true,
                                             user: user
                                         });
@@ -736,25 +738,25 @@ module.exports = (router) => {
         User.find({}, (err, users) => {
             if(err){
                 console.log('Unknown Error')
-                res.json({ success: false, message: err });
+                return res.json({ success: false, message: err });
             } else{
                 User.findOne({ email: req.decoded.email }, (err, mainUser) => {
                     if(err){
                         console.log('Error while finding main user')
-                        res.json({ success: false, message: err });
+                        return res.json({ success: false, message: err });
                     } else{
                         if(!mainUser){
                             console.log('Main User Not Found');
-                            res.json({ success: false, message: 'Main User Not Found' });
+                            return res.json({ success: false, message: 'Main User Not Found' });
                         } else{
                             if(mainUser.permission === 'admin' || mainUser.permission === 'moderator'){
                                 if(!users){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: 'No users Found'
                                     })
                                 } else{
-                                    res.json({
+                                    return res.json({
                                         success: true,
                                         users: users,
                                         permission: mainUser.permission
@@ -762,7 +764,7 @@ module.exports = (router) => {
                                 }
                             } else{
                                 console.log('Main user is not admin');
-                                res.json({ success: false, message: 'You do not have permission to view the users' });
+                                return res.json({ success: false, message: 'You do not have permission to view the users' });
                             }
                         }
                     }
@@ -777,13 +779,13 @@ module.exports = (router) => {
             if(err) throw err;
 
             if(!mainUser){
-                res.json({
+                return res.json({
                     success: false,
                     message: 'Cannot find MainUser'
                 });
             } else{
                 if(mainUser.permission !== 'admin'){
-                    res.json({
+                    return res.json({
                         success: false,
                         message: 'You are not an admin'
                     });
@@ -791,7 +793,7 @@ module.exports = (router) => {
                     User.findOneAndRemove({ email: req.params.email }, (err, delUser) => {
                         if(err) throw err;
 
-                        res.json({
+                        return res.json({
                             success: true,
                             message: 'You have successfully deleted the user',
                         });
@@ -806,7 +808,7 @@ module.exports = (router) => {
             if(err) throw err;
 
             if(!mainUser){
-                res.json({
+                return res.json({
                     success: false,
                     message: 'mainUser Not Found'
                 });
@@ -817,12 +819,12 @@ module.exports = (router) => {
                         if(err) throw err;
 
                         if(!user){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'User Not Found'
                             });
                         } else{
-                            res.json({
+                            return res.json({
                                 success: true,
                                 user: user,
                                 caller: mainUser
@@ -831,7 +833,7 @@ module.exports = (router) => {
                     });
                 } else{
                     console.log('Not an admin or moderator');
-                    res.json({
+                    return res.json({
                         success: false,
                         message: 'You are not an Admin or Moderator'
                     });
@@ -845,12 +847,12 @@ module.exports = (router) => {
             if(err) throw err;
 
             if(!mainUser){
-                res.json({
+                return res.json({
                     success: false,
                     message: 'mainUser Not Found'
                 });
             } else{
-                res.json({
+                return res.json({
                     success: true,
                     user: mainUser
                 });
@@ -863,7 +865,7 @@ module.exports = (router) => {
             if(err) throw err;
 
             if(!mainUser){
-                res.json({
+                return res.json({
                     success: false,
                     message: 'mainUser Not Found'
                 });
@@ -873,12 +875,12 @@ module.exports = (router) => {
                         if(err) throw err;
             
                         if(req.body.username === null || req.body.username === undefined || req.body.username === '' || req.body.email === null || req.body.email === undefined || req.body.email === '' || req.body.permission === null || req.body.permission === undefined || req.body.permission === ''){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Make sure the user has all the fields.'
                             });
                         } else if(!user){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'User with Id Not Found'
                             });
@@ -887,7 +889,7 @@ module.exports = (router) => {
                             user.username = req.body.username;
                             user.permission = req.body.permission;
                             user.save().then(() => {            
-                                res.json({
+                                return res.json({
                                     success: true,
                                     message: 'Updated successfully'
                                 });
@@ -895,31 +897,31 @@ module.exports = (router) => {
                                 console.log('Error while editing '+e);
                                 if(e.name === "MongoError"){
                                     if(e.keyPattern.username){
-                                        res.json({
+                                        return res.json({
                                             success: false,
                                             message: 'Username already exists'
                                         });
                                     } else if(e.keyPattern.email){
-                                        res.json({
+                                        return res.json({
                                             success: false,
                                             message: 'Email already exists'
                                         });
                                     }
                                 } else if(e.name === "ValidationError"){
                                     if(e.errors.email){
-                                        res.json({
+                                        return res.json({
                                             success: false,
                                             message: e.errors.email.message
                                         });
                                     } else if(e.errors.username){
-                                        res.json({
+                                        return res.json({
                                             success: false,
                                             message: e.errors.username.message
                                         });
                                     }
                                 } else{
                                     console.log('Here error '+e);
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: e
                                     });
@@ -933,18 +935,18 @@ module.exports = (router) => {
                         if(err) throw err;
             
                         if(req.body.username === null || req.body.username === undefined || req.body.username === '' || req.body.email === null || req.body.email === undefined || req.body.email === '' || req.body.permission === null || req.body.permission === undefined || req.body.permission === ''){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Make sure the user has all the fields.'
                             });
                         } else if(!user){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'User with Id Not Found'
                             });
                         } else{
                             if(user.permission === 'admin'){
-                                res.json({
+                                return res.json({
                                     success: false,
                                     message: 'Only an admin can change the data of another admin'
                                 });
@@ -953,38 +955,38 @@ module.exports = (router) => {
                                 user.username = req.body.username;
                                 user.permission = req.body.permission;
                                 user.save().then(() => {            
-                                    res.json({
+                                    return res.json({
                                         success: true,
                                         message: 'Updated successfully'
                                     });
                                 }).catch((e) => {
                                     if(e.name === "MongoError"){
                                         if(e.keyPattern.username){
-                                            res.json({
+                                            return res.json({
                                                 success: false,
                                                 message: 'Username already exists'
                                             });
                                         } else if(e.keyPattern.email){
-                                            res.json({
+                                            return res.json({
                                                 success: false,
                                                 message: 'Email already exists'
                                             });
                                         }
                                     } else if(e.name === "ValidationError"){
                                         if(e.errors.email){
-                                            res.json({
+                                            return res.json({
                                                 success: false,
                                                 message: e.errors.email.message
                                             });
                                         } else if(e.errors.username){
-                                            res.json({
+                                            return res.json({
                                                 success: false,
                                                 message: e.errors.username.message
                                             });
                                         }
                                     } else{
                                         console.log('Here error '+e);
-                                        res.json({
+                                        return res.json({
                                             success: false,
                                             message: e
                                         });
@@ -996,7 +998,7 @@ module.exports = (router) => {
                     })
                 } else{
                     console.log('Not an admin or moderator');
-                    res.json({
+                    return res.json({
                         success: false,
                         message: 'You are not an Admin or Moderator'
                     });
@@ -1010,7 +1012,7 @@ module.exports = (router) => {
             if(err) throw err;
 
             if(!mainUser){
-                res.json({
+                return res.json({
                     success: false,
                     message: 'mainUser Not Found'
                 });
@@ -1019,12 +1021,12 @@ module.exports = (router) => {
                     if(err) throw err;
         
                     if(req.body.username === null || req.body.username === undefined || req.body.username === '' || req.body.email === null || req.body.email === undefined || req.body.email === '' || req.body.permission === null || req.body.permission === undefined || req.body.permission === ''){
-                        res.json({
+                        return res.json({
                             success: false,
                             message: 'Please enter all the fields.'
                         });
                     } else if(!user){
-                        res.json({
+                        return res.json({
                             success: false,
                             message: 'User with Id Not Found'
                         });
@@ -1033,7 +1035,7 @@ module.exports = (router) => {
                         user.username = req.body.username;
                         user.permission = req.body.permission;
                         user.save().then(() => {            
-                            res.json({
+                            return res.json({
                                 success: true,
                                 message: 'Updated successfully'
                             });
@@ -1041,31 +1043,31 @@ module.exports = (router) => {
                             console.log('Error while editing '+e);
                             if(e.name === "MongoError"){
                                 if(e.keyPattern.username){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: 'Username already exists'
                                     });
                                 } else if(e.keyPattern.email){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: 'Email already exists'
                                     });
                                 }
                             } else if(e.name === "ValidationError"){
                                 if(e.errors.email){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: e.errors.email.message
                                     });
                                 } else if(e.errors.username){
-                                    res.json({
+                                    return res.json({
                                         success: false,
                                         message: e.errors.username.message
                                     });
                                 }
                             } else{
                                 console.log('Here error '+e);
-                                res.json({
+                                return res.json({
                                     success: false,
                                     message: e
                                 });
@@ -1085,12 +1087,12 @@ module.exports = (router) => {
             if(err) throw err;
 
             if(req.body.username === null || req.body.username === undefined || req.body.username === '' || req.body.email === null || req.body.email === undefined || req.body.email === '' || req.body.permission === null || req.body.permission === undefined || req.body.permission === ''){
-                res.json({
+                return res.json({
                     success: false,
                     message: 'Please enter all the fields.'
                 });
             } else if(!user){
-                res.json({
+                return res.json({
                     success: false,
                     message: 'User with Id Not Found'
                 });
@@ -1101,7 +1103,7 @@ module.exports = (router) => {
                 saveAvatar(user, req.body.avatar);
                 // console.log(req.body.avatar);
                 user.save().then(() => {            
-                    res.json({
+                    return res.json({
                         success: true,
                         message: 'Profile Img Uploaded successfully'
                     });
@@ -1109,31 +1111,31 @@ module.exports = (router) => {
                     console.log('Error while editing '+e);
                     if(e.name === "MongoError"){
                         if(e.keyPattern.username){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Username already exists'
                             });
                         } else if(e.keyPattern.email){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: 'Email already exists'
                             });
                         }
                     } else if(e.name === "ValidationError"){
                         if(e.errors.email){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: e.errors.email.message
                             });
                         } else if(e.errors.username){
-                            res.json({
+                            return res.json({
                                 success: false,
                                 message: e.errors.username.message
                             });
                         }
                     } else{
                         console.log('Here error '+e);
-                        res.json({
+                        return res.json({
                             success: false,
                             message: e
                         });
@@ -1148,18 +1150,18 @@ module.exports = (router) => {
             if(err) throw err;
 
             if(!user){
-                res.json({
+                return res.json({
                     success: false,
                     message: 'User with Id Not Found'
                 });
             } else{
                 if(!user.avatarImage || !user.avatarImageType){
-                    res.json({
+                    return res.json({
                         success: false,
                         message: 'User doesn\'t have a profile Img'
                     });
                 } else{
-                    res.json({
+                    return res.json({
                         success: true,
                         path: user.avatarImagePath
                     })

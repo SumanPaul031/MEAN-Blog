@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpResponse } from '@angular/common/http';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, shareReplay } from 'rxjs/operators';
 import { Router } from '@angular/router';
 
 @Injectable({
@@ -12,6 +12,7 @@ export class AuthService {
 
   registerUser(user){
     return this.http.post(`/authentication/register`, user, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -20,6 +21,7 @@ export class AuthService {
 
   checkEmail(email){
     return this.http.get(`/authentication/checkEmail/${email}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // console.log(res);
       })
@@ -28,6 +30,7 @@ export class AuthService {
 
   checkUsername(username){
     return this.http.get(`/authentication/checkUsername/${username}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // console.log(res);
       })
@@ -36,6 +39,7 @@ export class AuthService {
 
   findUsers(){
     return this.http.get(`/authentication/users`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // console.log(res);
       })
@@ -44,6 +48,7 @@ export class AuthService {
 
   displayUsers(username: string){
     return this.http.get(`/authentication/displayUsers/${username}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // console.log(res);
       })
@@ -52,6 +57,7 @@ export class AuthService {
 
   profileDisplay(username: string){
     return this.http.get(`/authentication/profiledisplay/${username}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // console.log(res);
       })
@@ -60,6 +66,7 @@ export class AuthService {
 
   login(user){
     return this.http.post(`/authentication/login`, user, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // console.log(res);
         if(res.body.user){
@@ -77,6 +84,7 @@ export class AuthService {
       },
       observe: 'response'
     }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         this.setAccessToken(res.body.headers['x-access-token']);
       })
@@ -101,6 +109,7 @@ export class AuthService {
 
   getUser(){
     return this.http.get(`/authentication/me`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -109,6 +118,7 @@ export class AuthService {
 
   activateAccount(token: string){
     return this.http.get(`/authentication/activate/${token}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -117,6 +127,7 @@ export class AuthService {
 
   checkResendEmail(email: string){
     return this.http.post('/authentication/resend', {email}, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -125,6 +136,7 @@ export class AuthService {
 
   resendLink(email: string){
     return this.http.put('/authentication/resend', {email}, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -133,6 +145,7 @@ export class AuthService {
 
   sendUsername(email: string){
     return this.http.get(`/authentication/resetusername/${email}`, {observe: 'response'}).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -141,6 +154,7 @@ export class AuthService {
 
   sendPassword(email: string){
     return this.http.put('/authentication/resetpassword', {email}, {observe: 'response'}).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -149,6 +163,7 @@ export class AuthService {
 
   resetPassword(token: string){
     return this.http.get(`/authentication/newpassword/${token}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -157,6 +172,7 @@ export class AuthService {
 
   savePassword(email: string, password: string){
     return this.http.put('/authentication/savepassword', {email, password}, {observe: 'response'}).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -177,6 +193,7 @@ export class AuthService {
 
   getUsers(){
     return this.http.get(`/authentication/management`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         console.log(res);
       })
@@ -185,6 +202,7 @@ export class AuthService {
 
   getEditUser(id: string){
     return this.http.get(`/authentication/edit/${id}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // this.userId = res.body._id;
      })
@@ -193,6 +211,7 @@ export class AuthService {
 
   getOwnEditUser(id: string){
     return this.http.get(`/authentication/ownedit/${id}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // this.userId = res.body._id;
      })
@@ -201,6 +220,7 @@ export class AuthService {
 
   EditUser(id: string, username: string, email: string, permission: string){
     return this.http.put(`/authentication/edit/${id}`, {username, email, permission}, {observe: 'response'}).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // this.userId = res.body._id;
      })
@@ -209,6 +229,7 @@ export class AuthService {
 
   UploadImg(id: string, username: string, email: string, permission: string, avatar){
     return this.http.post(`/authentication/profileImg/${id}`, {username, email, permission, avatar}, {observe: 'response'}).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // this.userId = res.body._id;
      })
@@ -217,6 +238,7 @@ export class AuthService {
 
   GetImg(id: string){
     return this.http.get(`/authentication/profileImg/${id}`, {observe: 'response'}).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // this.userId = res.body._id;
      })
@@ -225,6 +247,7 @@ export class AuthService {
 
   EditOwnUser(id: string, username: string, email: string, permission: string){
     return this.http.put(`/authentication/ownedit/${id}`, {username, email, permission}, {observe: 'response'}).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // this.userId = res.body._id;
      })
@@ -233,6 +256,7 @@ export class AuthService {
 
   deleteUser(email: string){
     return this.http.delete(`/authentication/management/${email}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
         // this.userId = res.body._id;
      })
@@ -243,6 +267,7 @@ export class AuthService {
   /* For Blogs */
   PostBlog(title: string, body: string, createdBy: string){
     return this.http.post(`/blogs/newBlog`, { title, body, createdBy }, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
      })
     );
@@ -250,6 +275,7 @@ export class AuthService {
 
   GetBlogs(){
     return this.http.get(`/blogs/allBlogs`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
      })
     );
@@ -257,6 +283,7 @@ export class AuthService {
 
   EditBlog(id: string){
     return this.http.get(`/blogs/editBlog/${id}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
      })
     );
@@ -264,6 +291,7 @@ export class AuthService {
 
   UpdateBlog(id: string, title: string, body: string, createdBy: string){
     return this.http.put(`/blogs/editBlog/${id}`, { title, body, createdBy }, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
      })
     );
@@ -271,6 +299,55 @@ export class AuthService {
 
   DeleteBlog(id: string){
     return this.http.delete(`/blogs/editBlog/${id}`, { observe: 'response' }).pipe(
+      shareReplay(),
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  LikeBlog(id: string){
+    return this.http.put(`/blogs/likeBlog`, { id }, { observe: 'response' }).pipe(
+      shareReplay(),
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  DislikeBlog(id: string){
+    return this.http.put(`/blogs/dislikeBlog`, { id }, { observe: 'response' }).pipe(
+      shareReplay(),
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  PostComment(id: string, comment: string){
+    return this.http.post(`/blogs/comment`, { id, comment }, { observe: 'response' }).pipe(
+      shareReplay(),
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  GetEditComment(id: string, commentId: string){
+    return this.http.get(`/blogs/blog/${id}/comment/${commentId}`, { observe: 'response' }).pipe(
+      shareReplay(),
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  EditComment(id: string, comment: string, commentId: string){
+    return this.http.put(`/blogs/comment`, { id, comment, commentId }, { observe: 'response' }).pipe(
+      shareReplay(),
+      tap((res: HttpResponse<any>) => {
+     })
+    );
+  }
+
+  DeleteComment(id: string, commentId: string){
+    return this.http.delete(`/blogs/blog/${id}/comment/${commentId}`, { observe: 'response' }).pipe(
+      shareReplay(),
       tap((res: HttpResponse<any>) => {
      })
     );
