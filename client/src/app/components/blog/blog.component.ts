@@ -48,6 +48,9 @@ export class BlogComponent implements OnInit {
   hasProfileImg: boolean;
   path;
 
+  hasCommentatorProfileImg: boolean;
+  commentatorImgpath;
+
   newPost: boolean = false;
   blogs;
   blogsAvailable: boolean;
@@ -59,7 +62,7 @@ export class BlogComponent implements OnInit {
   constructor(
     private dataSharingService: DataSharingService,
     private authService: AuthService,
-    private sanitizer: DomSanitizer,
+    public sanitizer: DomSanitizer,
     private toastr: ToastrService,
     private orderPipe: OrderPipe
   ) { 
@@ -189,6 +192,10 @@ export class BlogComponent implements OnInit {
       this.hasProfileImg = false;
       this.dataSharingService.avatarImg.next({});
     })
+  }
+
+  getCommentatorimage(imageType, image){
+    return this.sanitizer.bypassSecurityTrustResourceUrl('data:'+imageType+';base64,'+image.toString('base64'));
   }
 
   titleErrorMessage(){
@@ -360,7 +367,7 @@ export class BlogComponent implements OnInit {
         this.editcomment = res.body.comment.comment;
         this.editcommentId = res.body.comment._id;
         this.editCommentedAt = res.body.comment.commentedAt;
-        this.editcommentator = res.body.comment.commentator;
+        this.editcommentator = res.body.comment.commentator.username;
       } else{
         console.log(res.body.message);
         this.toastr.error(res.body.message, 'Failure');

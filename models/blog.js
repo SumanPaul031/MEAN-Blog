@@ -89,7 +89,7 @@ const blogSchema = new Schema({
     comments: [
         {
             comment: { type: String, validate: commentValidators },
-            commentator: { type: String },
+            commentator: { type: mongoose.Schema.Types.Object, ref: 'User' },
             commentedAt: { type: Date, default: Date.now() }
         }
     ]

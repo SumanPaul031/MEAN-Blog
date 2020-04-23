@@ -102,18 +102,24 @@
                 <li class="list-group-item" *ngFor="let comment of blog.comments | orderBy: blog.comments.commentedAt : true">
                     <div class="row">
                         <div class="col-xs-2 col-md-2">
-                            <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" />
+                            <!-- <img src="http://placehold.it/80" class="img-circle img-responsive" alt="" /> -->
+                            <ng-template [ngIf]="comment.commentator.avatarImageType && comment.commentator.avatarImage">
+                              <img [src]="getCommentatorimage(comment.commentator.avatarImageType, comment.commentator.avatarImage)" style="max-height: 80px; max-width: 80px;" class="clipped" alt="Profile Image">
+                            </ng-template>
+                            <ng-template [ngIf]="!comment.commentator.avatarImageType || !comment.commentator.avatarImage">
+                              <img src="../../../assets/placeholder.png" style="max-height: 80px; max-width: 80px;" class="clipped" alt="Profile Image">
+                            </ng-template>
                         </div>
                         <div class="col-xs-10 col-md-10">
                             <div>
                                 <div>
-                                    By: <a [routerLink]="['/profiledisplay', comment.commentator]">{{comment.commentator}}</a> on {{comment.commentedAt | date: 'fullDate'}}
+                                    By: <a [routerLink]="['/profiledisplay', comment.commentator.username]">{{comment.commentator.username}}</a> on {{comment.commentedAt | date: 'fullDate'}}
                                 </div>
                             </div>
                             <div>
                                 {{comment.comment}}
                             </div>
-                            <div *ngIf="comment.commentator === username" style="margin-top: 0.4rem;">
+                            <div *ngIf="comment.commentator.username === username" style="margin-top: 0.4rem;">
                                 <button id="editComment" type="button" class="btn btn-success btn-sm" (click)="GetEditComment(blog._id, comment._id)" data-toggle="modal" data-target="#editcommentModal">
                                   <i class="fa fa-edit"></i>
                                 </button>

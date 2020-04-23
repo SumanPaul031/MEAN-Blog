@@ -329,7 +329,7 @@ module.exports = (router) => {
                                         } else{
                                             blog.comments.push({
                                                 comment: req.body.comment,
-                                                commentator: user.username,
+                                                commentator: user,
                                                 commentedAt: Date.now()
                                             });
                                             
@@ -374,10 +374,8 @@ module.exports = (router) => {
                                     } else{
                                         var index = blog.comments.findIndex(i => i._id == req.params.commentId);
 
-                                        console.log(blog.comments[index]);
-
                                         if(blog.comments[index]){
-                                            if(user.username !== blog.comments[index].commentator){
+                                            if(String(user._id) !== String(blog.comments[index].commentator._id)){
                                                 res.json({ success: false, message: 'Cannot edit other\'s comments' });
                                             } else{
                                                 res.json({ success: true, comment: blog.comments[index], blog: blog });
@@ -418,14 +416,14 @@ module.exports = (router) => {
                                     } else{
                                         var index = blog.comments.findIndex(i => i._id == req.body.commentId);
 
-                                        if(user.username !== blog.comments[index].commentator){
+                                        if(String(user._id) !== String(blog.comments[index].commentator._id)){
                                             res.json({ success: false, message: 'Cannot edit other\'s comments' });
                                         } else{
                                             // res.json({ success: true, comment: blog.comments[index], blog: blog });
                                             blog.comments.splice(index, 1);
                                             blog.comments.push({
                                                 comment: req.body.comment,
-                                                commentator: user.username,
+                                                commentator: user,
                                                 commentedAt: Date.now()
                                             });
 
@@ -470,7 +468,7 @@ module.exports = (router) => {
                                     } else{
                                         var index = blog.comments.findIndex(i => i._id == req.params.commentId);
 
-                                        if(user.username !== blog.comments[index].commentator){
+                                        if(String(user._id) !== String(blog.comments[index].commentator._id)){
                                             res.json({ success: false, message: 'Cannot delete other\'s comments' });
                                         } else{
                                             blog.comments.splice(index, 1);
