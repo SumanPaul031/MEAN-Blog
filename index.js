@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const passport = require('passport');
 const cors = require('cors');
+const port = process.env.PORT || 8080;
 
 const authentication = require('./routes/authentication')(router);
 const blogs = require('./routes/blogs')(router);
@@ -29,28 +30,17 @@ app.use(cors({
 app.use(bodyParser.urlencoded({limit: '50mb', extended: false }));
 app.use(bodyParser.json({limit: '50mb'}));
 
-app.use(express.static(__dirname + '/client/dist/client/'));
+// app.use(express.static(__dirname + '/client/dist/client/'));
+app.use(express.static(__dirname + '/public'));
 
-// app.use(session({
-//     secret: 'cookie_secret',
-//     name: 'cookie_name',
-//     resave: true,
-//     saveUninitialized: true,
-//     cookie: { secure: false },
-//   }));
-//   app.use(passport.initialize());
-//   app.use(passport.session());
-// var passportOneSessionPerUser = require('passport-one-session-per-user')
-// passport.use(new passportOneSessionPerUser())
-// app.use(passport.authenticate('passport-one-session-per-user'))
 
 app.use('/authentication', authentication);
 app.use('/blogs', blogs);
 
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname + '/client/dist/client/index.html'));
+    res.sendFile(path.join(__dirname + '/public/index.html'));
 });
 
-app.listen(3000, () => {
-    console.log('Listening on Port 3000');
+app.listen(port, () => {
+    console.log('Listening on Port '+port);
 });
